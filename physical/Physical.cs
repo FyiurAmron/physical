@@ -11,8 +11,10 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace Physical {
-    public class HelloGL3 : GameWindow {
+namespace physical {
+    public class PhysicalWindow : GameWindow {
+        public const string APP_NAME = "Physical";
+
         string vertexShaderSource = @"
 #version 140
 precision highp float;
@@ -81,19 +83,19 @@ void main() {
 
         Matrix4 projectionMatrix, modelviewMatrix;
 
-        public HelloGL3 ()
+        public PhysicalWindow ()
             : base( 640, 480,
                     new GraphicsMode(), "OpenGL 3 Example", 0,
                     DisplayDevice.Default, 3, 2,
                     GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug ) {
         }
 
-        float[][] sphereData;
+        SphereModel sm;
 
         protected override void OnLoad ( System.EventArgs e ) {
-            SphereModel sm = new SphereModel(0.5f,10,10,true);
-            sphereData = sm.prepare();
-            int vCount = sphereData[0].Length/3;
+            sm = new SphereModel(0.5f,10,10,true);
+
+            int vCount = sm.getVertices().Length / 3;
             indicesVboData = new int[vCount];
             for ( int i = 0; i < vCount; i++ )
                 indicesVboData[i] = i;
@@ -151,15 +153,15 @@ void main() {
             positionVboHandle = GL.GenBuffer();
             GL.BindBuffer( BufferTarget.ArrayBuffer, positionVboHandle );
             GL.BufferData<float>( BufferTarget.ArrayBuffer,
-                new IntPtr( sphereData[0].Length * Vector3.SizeInBytes ),
-                sphereData[0], BufferUsageHint.StaticDraw );
+                new IntPtr( sm.getVertices().Length * Vector3.SizeInBytes ),
+                sm.getVertices(), BufferUsageHint.StaticDraw );
 
             normalVboHandle = GL.GenBuffer();
             GL.BindBuffer( BufferTarget.ArrayBuffer, normalVboHandle );
 
             GL.BufferData<float>( BufferTarget.ArrayBuffer,
-                new IntPtr( sphereData[0].Length * Vector3.SizeInBytes ),
-                sphereData[1], BufferUsageHint.StaticDraw );
+                new IntPtr( sm.getNormals().Length * Vector3.SizeInBytes ),
+                sm.getNormals(), BufferUsageHint.StaticDraw );
 
 
             eboHandle = GL.GenBuffer();
@@ -220,7 +222,7 @@ void main() {
 
         [STAThread]
         public static void Main () {
-            using ( HelloGL3 example = new HelloGL3() ) {
+            using ( PhysicalWindow example = new PhysicalWindow() ) {
 
                 example.Run( 30 );
             }

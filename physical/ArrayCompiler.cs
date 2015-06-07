@@ -5,7 +5,7 @@
 using System;
 using biz.ritter.javapi.lang;
 
-namespace Physical {
+namespace physical {
     abstract public class ArrayCompiler {
         protected int pos, len;
 
@@ -13,35 +13,35 @@ namespace Physical {
             this.len = len;
         }
 
-        public int get_pos () {
+        public int getPos () {
             return pos;
         }
 
-        protected void check_pos () {
+        protected void checkPos () {
             if ( pos < 0 || pos >= len )
                 throw new IndexOutOfRangeException( ""+pos );
         }
 
-        public void set_pos ( int pos ) {
+        public void setPos ( int pos ) {
             this.pos = pos;
-            check_pos();
+            checkPos();
         }
 
-        public void move_pos ( int offset ) {
+        public void movePos ( int offset ) {
             pos += offset;
-            check_pos();
+            checkPos();
         }
 
         public class bytes : ArrayCompiler {
             protected byte[] arr;
-            protected bool little_endian;
+            protected bool littleEndian;
 
             public bytes ( int len ) : base(len) {
                 arr = new byte[len];
             }
 
-            public void set_endianess ( bool is_little_endian ) {
-                little_endian = is_little_endian;
+            public void setEndianess ( bool is_little_endian ) {
+                littleEndian = is_little_endian;
             }
 
             public void put ( byte b ) {
@@ -83,10 +83,10 @@ namespace Physical {
             }
 
             public void put ( long l, int bytes ) { // bytes - significant bytes (counted from right)
-                int ppos = little_endian ? pos + bytes : pos;
+                int ppos = littleEndian ? pos + bytes : pos;
                 for ( int i = 0; i < bytes; i++, l >>= 8 ) {
                     arr[ppos] = (byte) l; // cast implies & 0xFF
-                    if ( little_endian )
+                    if ( littleEndian )
                         ppos--;
                     else
                         ppos++;

@@ -44,6 +44,9 @@
     <Compile Include="Physical.cs" />
     <Compile Include="SphereModel.cs" />
     <Compile Include="ArrayCompiler.cs" />
+    <Compile Include="Renderable.cs" />
+    <Compile Include="Model.cs" />
+    <Compile Include="FloatBuffer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
