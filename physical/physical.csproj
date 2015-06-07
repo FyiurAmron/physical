@@ -49,6 +49,7 @@
     <Compile Include="ModelData.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Physical.cs" />
+    <Compile Include="Uniform.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

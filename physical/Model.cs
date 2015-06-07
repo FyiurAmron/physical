@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
-using System.Runtime.InteropServices;
 
 namespace physical {
     public class Model : Renderable {
@@ -12,18 +13,20 @@ namespace physical {
             VS_COUNT = 3;
         // v, vn, vt; 3 total.
         public const float PI = (float) Math.PI, TWO_PI = 2 * PI;
-        protected readonly String[,] OBJ_section_name = {
+        protected static readonly String[,] OBJ_section_name = {
             { "vertices", "v" },
             { "normals", "vn" },
             { "UVs", "vt" }
         };
-            
+        Matrix4 transform = new Matrix4();
+
+        Matrix4 Transform { get { return transform; } }
+
         int
             vaoHandle,
             positionVboHandle,
             normalVboHandle,
             eboHandle;
-        int nextAttributeNumber;
 
         protected readonly ModelData modelData;
 
@@ -50,11 +53,10 @@ namespace physical {
             return handle;
         }
 
-        void EnableAttribute ( int handle, int size ) {
-            GL.EnableVertexAttribArray( nextAttributeNumber );
+        void EnableAttribute ( int attribNr, int handle, int size ) {
+            GL.EnableVertexAttribArray( attribNr );
             GL.BindBuffer( BufferTarget.ArrayBuffer, handle );
-            GL.VertexAttribPointer( nextAttributeNumber, size, VertexAttribPointerType.Float, true, size * sizeof(float), 0 );
-            nextAttributeNumber++;
+            GL.VertexAttribPointer( attribNr, size, VertexAttribPointerType.Float, true, size * sizeof(float), 0 );
         }
 
         public void init () {
@@ -66,8 +68,8 @@ namespace physical {
 
             vaoHandle = GL.GenVertexArray();
             GL.BindVertexArray( vaoHandle );
-            EnableAttribute( positionVboHandle, Model.V_DIMS );
-            EnableAttribute( normalVboHandle, Model.VN_DIMS );
+            EnableAttribute( 0, positionVboHandle, Model.V_DIMS );
+            EnableAttribute( 1, normalVboHandle, Model.VN_DIMS );
             GL.BindBuffer( BufferTarget.ElementArrayBuffer, eboHandle );
             GL.BindVertexArray( 0 );
         }

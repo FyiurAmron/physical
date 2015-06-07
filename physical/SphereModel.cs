@@ -22,7 +22,6 @@ namespace physical {
         //bool outside;
         ArrayCompiler.floats[] fac;
 
-
         protected void swapCache () {
             float[][][] tmp = vCache[0];
             vCache[0] = vCache[1];
