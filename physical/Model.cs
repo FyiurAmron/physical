@@ -1,5 +1,8 @@
 ﻿using System;
 using System.IO;
+using OpenTK.Graphics.OpenGL;
+using OpenTK;
+using System.Runtime.InteropServices;
 
 namespace physical {
     public class Model : Renderable {
@@ -9,60 +12,84 @@ namespace physical {
             VS_COUNT = 3;
         // v, vn, vt; 3 total.
         public const float PI = (float) Math.PI, TWO_PI = 2 * PI;
-        protected readonly String[][] OBJ_section_name = {
-            new String[]{ "vertices", "v" },
-            new String[]{ "normals", "vn" },
-            new String[]{ "UVs", "vt" }
+        protected readonly String[,] OBJ_section_name = {
+            { "vertices", "v" },
+            { "normals", "vn" },
+            { "UVs", "vt" }
         };
             
-        protected readonly float[] vs, vns, vts;
-        protected readonly float[][] data;
-        protected readonly int vertexCount;
+        int
+            vaoHandle,
+            positionVboHandle,
+            normalVboHandle,
+            eboHandle;
+        int nextAttributeNumber;
 
-        public Model ( float[][] data ) {
-            this.data = data;
-            vs = data[0];
-            vns = data[1];
-            vts = data[2];
-            vertexCount = vs.Length / V_DIMS;
+        protected readonly ModelData modelData;
+
+        public ModelData ModelData{ get { return modelData; } }
+
+        public Model ( ModelData modelData ) {
+            this.modelData = modelData;
         }
 
-        public Model ( float[] vertices, float[] normals, float[] uvs ) : this( new float[][]{ vertices, normals, uvs } ) {
+        public Model ( float[] vertices, float[] normals, float[] uvs, int[] indices ) : this( new ModelData( vertices, normals, uvs, indices ) ) {
         }
 
         public void render () {
+            GL.BindVertexArray( vaoHandle );
+
+            GL.DrawElements( PrimitiveType.Triangles, modelData.Indices.Length,
+                DrawElementsType.UnsignedInt, IntPtr.Zero );
         }
 
-        public float[] getVertices () {
-            return vs;
+        int GenBuffer<T> ( BufferTarget bufferTarget, T[] data ) where T:struct {
+            int handle = GL.GenBuffer();
+            GL.BindBuffer( bufferTarget, handle );
+            GL.BufferData<T>( bufferTarget, new IntPtr( data.Length * Marshal.SizeOf( data[0] ) ), data, BufferUsageHint.StaticDraw );
+            return handle;
         }
 
-        public float[] getNormals () {
-            return vns;
+        void EnableAttribute ( int handle, int size ) {
+            GL.EnableVertexAttribArray( nextAttributeNumber );
+            GL.BindBuffer( BufferTarget.ArrayBuffer, handle );
+            GL.VertexAttribPointer( nextAttributeNumber, size, VertexAttribPointerType.Float, true, size * sizeof(float), 0 );
+            nextAttributeNumber++;
         }
 
-        public float[] getUVs () {
-            return vts;
+        public void init () {
+            positionVboHandle = GenBuffer( BufferTarget.ArrayBuffer, ModelData.Vertices );
+            normalVboHandle = GenBuffer( BufferTarget.ArrayBuffer, ModelData.Normals );
+            eboHandle = GenBuffer( BufferTarget.ElementArrayBuffer, ModelData.Indices );
+            GL.BindBuffer( BufferTarget.ArrayBuffer, 0 );
+            GL.BindBuffer( BufferTarget.ElementArrayBuffer, 0 );
+
+            vaoHandle = GL.GenVertexArray();
+            GL.BindVertexArray( vaoHandle );
+            EnableAttribute( positionVboHandle, Model.V_DIMS );
+            EnableAttribute( normalVboHandle, Model.VN_DIMS );
+            GL.BindBuffer( BufferTarget.ElementArrayBuffer, eboHandle );
+            GL.BindVertexArray( 0 );
         }
 
         protected void writeOBJ_buf ( StreamWriter sw, int bufNr ) {
-            var fb = new FloatBuffer( data[bufNr] );
-            sw.Write( "\n# " + OBJ_section_name[bufNr][0] );
-            String prefix = "\n" + OBJ_section_name[bufNr][1] + " ";
+            var fb = new FloatBuffer( modelData.Data[bufNr] );
+            sw.Write( "\n# " + OBJ_section_name[bufNr, 0] );
+            String prefix = "\n" + OBJ_section_name[bufNr, 1] + " ";
             if ( bufNr != 2 )
-                for ( int j = 0; j < vertexCount; j++ )
+                for ( int j = 0; j < modelData.VertexCount; j++ )
                     sw.Write( prefix + fb.get() + " " + fb.get() + " " + fb.get() );
             else
-                for ( int j = 0; j < vertexCount; j++ )
+                for ( int j = 0; j < modelData.VertexCount; j++ )
                     sw.Write( prefix + fb.get() + " " + fb.get() );
             sw.Write( "\n" );
         }
 
         public void writeOBJ ( String filename ) {
             using ( StreamWriter sw = new StreamWriter( filename ) ) {
-                sw.Write( "# created by " + PhysicalWindow.APP_NAME + "\n" );
-                int tri_cnt = vertexCount / VERTEX_COUNT;
-                sw.Write( "# " + vertexCount + " vertex total == normals == UVs\n"
+                sw.Write( "# created by " + main.APP_NAME + "\n" );
+                int tri_cnt = modelData.VertexCount / VERTEX_COUNT;
+                sw.Write( "# " + modelData.VertexCount + " vertex total == normals == UVs\n"
                 + "# " + tri_cnt + " tris == faces\n"
                 + "\n# VERTEX" );
                 writeOBJ_buf( sw, 0 );

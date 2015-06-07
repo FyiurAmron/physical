@@ -53,7 +53,7 @@ namespace physical {
             }
         }
 
-        protected float[][] buildFloats ( float radius, int slices, int stacks, bool outside ) {
+        protected ModelData buildFloats ( float radius, int slices, int stacks, bool outside ) {
             this.radius = radius;
             this.slices = slices;
             if ( stacks < 2 || slices < 2 )
@@ -128,10 +128,11 @@ namespace physical {
                         new float[]{ s, 1 }
                     },
                     vCache[0][j + 1] );
-            return new float[][] { fac[0].compile(), fac[1].compile(), fac[2].compile() };
+            return new ModelData( fac[0].compile(), fac[1].compile(), fac[2].compile() );
+            // TODO optimize indices
         }
 
-        public static float[][] build ( float radius, int slices, int stacks, bool outside ) {
+        public static ModelData build ( float radius, int slices, int stacks, bool outside ) {
             return new SphereBuilder().buildFloats( radius, slices, stacks, outside );
         }
     }
