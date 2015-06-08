@@ -51,6 +51,13 @@
     <Compile Include="Physical.cs" />
     <Compile Include="Uniform.cs" />
     <Compile Include="Texture.cs" />
+    <Compile Include="math\Matrix4f.cs" />
+    <Compile Include="math\Vector3f.cs" />
+    <Compile Include="math\Vector2f.cs" />
+    <Compile Include="math\Vector4f.cs" />
+    <Compile Include="math\Value1f.cs" />
+    <Compile Include="math\Vector.cs" />
+    <Compile Include="math\VectorFloat.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -64,4 +71,7 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <ItemGroup>
+    <Folder Include="math\" />
+  </ItemGroup>
 </Project>

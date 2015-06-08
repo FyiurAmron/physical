@@ -11,6 +11,9 @@ using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
+
+using physical.math;
 
 namespace physical {
     public class PhysicalWindow : GameWindow {
@@ -65,17 +68,20 @@ void main() {
             fragmentShaderHandle,
             shaderProgramHandle;
 
-        //    modelviewMatrixLocation,
-        //    projectionMatrixLocation;
+        Value1f //
+            time = new Value1f(),
+            textureSampler = new Value1f( 0 );
+        Vector3f //
+            ambientColor = new Vector3f(),
+            lightColor = new Vector3f(),
+            lightDirUnit = new Vector3f();
+        Matrix4f //
+            projectionMatrix = new Matrix4f(),
+            modelviewMatrix = new Matrix4f();
 
-        Matrix4 projectionMatrix, modelviewMatrix;
-        Vector3 //
-            ambientColor = new Vector3( 0.1f, 0.1f, 0.1f ),
-            lightColor = new Vector3( 0.9f, 0.9f, 0.9f ),
-            lightDirUnit = new Vector3( 0.5f, 0.5f, 2.0f ).Normalized();
-        float time;
-        SphereModel sm;
-        Texture texture;
+        SphereModel sphereModel;
+        UniformManager uniformManager = new UniformManager();
+        Texture angrySquirrelTexture;
 
         public static readonly String[] attribs = { "in_position", "in_normal", "in_uv" };
         public static readonly String[] uniforms = {
@@ -98,16 +104,21 @@ void main() {
         }
 
         protected override void OnLoad ( System.EventArgs e ) {
+            ambientColor.set( 0.1f, 0.1f, 0.1f );
+            lightColor.set( 1.0f, 1.0f, 1.0f );
+            lightDirUnit.set( 0.5f, 0.5f, 2.0f );
+            lightDirUnit.normalize();
             //texture = new Texture( "E:\\drop\\logo-dark.jpg" );
-            texture = new Texture( "E:\\drop\\angry-squirell.png" );
+            angrySquirrelTexture = new Texture( "E:\\drop\\angry-squirrel.png" );
 
             CreateShaders();
 
-            sm = new SphereModel( 1f, 10, 10, true );
+            sphereModel = new SphereModel( 1f, 10, 10, true );
             //sm = new SphereModel( 1.5f, 4, 2, true );
-            sm.init();
-            sm.writeOBJ();
-            renderables.Add( sm );
+            sphereModel.init();
+            sphereModel.Texture = angrySquirrelTexture;
+            //sm.writeOBJ();
+            renderables.Add( sphereModel );
 
             VSync = VSyncMode.On;
 
@@ -145,42 +156,44 @@ void main() {
                 uniformMap.Add( s, GL.GetUniformLocation( shaderProgramHandle, s ) );
 
             float aspectRatio = ClientSize.Width / (float) ( ClientSize.Height );
-            Matrix4.CreatePerspectiveFieldOfView( (float) Math.PI / 4, aspectRatio, 1, 100, out projectionMatrix );
-            modelviewMatrix = Matrix4.LookAt( new Vector3( -8, 0, -4 ), new Vector3( 0, 0, 0 ), new Vector3( 0, 1, 0 ) );
+            //Matrix4.crea
+            //Matrix4.CreatePerspectiveFieldOfView( (float) Math.PI / 4, aspectRatio, 1, 100, out projectionMatrix );
+            projectionMatrix.set( Matrix4.CreatePerspectiveFieldOfView( (float) Math.PI / 4, aspectRatio, 1, 100 ) );
+            modelviewMatrix.set( Matrix4.LookAt( new Vector3( -8, 0, -4 ), new Vector3( 0, 0, 0 ), new Vector3( 0, 1, 0 ) ) );
 
-            setUniforms();
+            uniformManager.addUniform( new UniformMatrix4f( "projectionMatrix", projectionMatrix ) );
+            uniformManager.addUniform( new UniformMatrix4f( "modelviewMatrix", modelviewMatrix ) );
+            uniformManager.addUniform( new Uniform3f( "ambientColor", ambientColor ) );
+            uniformManager.addUniform( new Uniform3f( "lightColor", lightColor ) );
+            uniformManager.addUniform( new Uniform3f( "lightDirUnit", lightDirUnit ) );
+            uniformManager.addUniform( new Uniform1f( "time", time ) );
+            uniformManager.addUniform( new Uniform1f( "textureSamples", textureSampler ) );
+            uniformManager.init( shaderProgramHandle );
+
+            //setUniforms();
         }
 
         protected override void OnUpdateFrame ( FrameEventArgs e ) {
-            Matrix4 rotation = Matrix4.CreateRotationZ( (float) e.Time * 4 );
-            Matrix4.Mult( ref rotation, ref modelviewMatrix, out modelviewMatrix );
+            time.Value = ( DateTime.Now.Ticks % ( 100L * 1000 * 1000 * 1000 ) ) / 1E7f;
+            //Console.WriteLine( time[0] );
 
-            var keyboard = OpenTK.Input.Keyboard.GetState();
-            if ( keyboard[OpenTK.Input.Key.Escape] )
+            Matrix4 rotation = Matrix4.CreateRotationZ( (float) e.Time * 4 ), source = modelviewMatrix.toMatrix4(), result = new Matrix4();
+            Matrix4.Mult( ref rotation, ref source, out result );
+            modelviewMatrix.set( result );
+            ambientColor.Y = (float)Math.Sin(time.Value);
+            //Console.WriteLine( ambientColor.Y );
+
+            KeyboardState keyboard = OpenTK.Input.Keyboard.GetState();
+            if ( keyboard[Key.Escape] )
                 Exit();
         }
 
-        void setUniforms () {
-            GL.UniformMatrix4( uniformMap[uniforms[0]], false, ref projectionMatrix );
-            GL.UniformMatrix4( uniformMap[uniforms[1]], false, ref modelviewMatrix );
-            GL.Uniform3( uniformMap[uniforms[2]], ref ambientColor );
-            GL.Uniform3( uniformMap[uniforms[3]], ref lightColor );
-            GL.Uniform3( uniformMap[uniforms[4]], ref lightDirUnit );
-            GL.Uniform1( uniformMap[uniforms[5]], time );
-            GL.Uniform1( uniformMap[uniforms[6]], 0 );
-        }
-
         protected override void OnRenderFrame ( FrameEventArgs e ) {
-            time = ( DateTime.Now.Ticks % 100000000000 ) / 1E7f;
-            //Console.WriteLine(time);
-
             GL.Viewport( 0, 0, Width, Height );
 
             GL.Clear( ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit );
 
-            GL.BindTexture( TextureTarget.Texture2D, texture.Handle );
-
-            setUniforms();
+            uniformManager.updateGl();
 
             foreach ( Renderable r in renderables ) {
                 r.render();

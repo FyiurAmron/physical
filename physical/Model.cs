@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
+
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
 
@@ -20,7 +21,9 @@ namespace physical {
         };
         Matrix4 transform = new Matrix4();
 
-        Matrix4 Transform { get { return transform; } }
+        public Matrix4 Transform { get { return transform; } }
+
+        public Texture Texture { get; set; }
 
         int
             vaoHandle,
@@ -41,6 +44,8 @@ namespace physical {
         }
 
         public void render () {
+            if ( Texture != null )
+                GL.BindTexture( TextureTarget.Texture2D, Texture.Handle );
             GL.BindVertexArray( vaoHandle );
 
             GL.DrawElements( PrimitiveType.Triangles, modelData.Indices.Length,
@@ -90,10 +95,6 @@ namespace physical {
             sw.Write( "\n" );
         }
 
-        public void writeOBJ () {
-            writeOBJ( "" + GetType() );
-        }
-
         public void writeOBJ ( String filename ) {
             using ( StreamWriter sw = new StreamWriter( filename + ".obj" ) ) {
                 sw.Write( "# created by " + main.APP_NAME + "\n" );
@@ -111,6 +112,10 @@ namespace physical {
                 }
                 sw.Write( "\n# EOF\n" );
             }
+        }
+
+        public void writeOBJ () {
+            writeOBJ( "" + GetType() );
         }
     }
 }
