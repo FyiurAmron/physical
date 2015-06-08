@@ -11,6 +11,8 @@ namespace physical {
         void updateGl ( int uniformLocation );
 
         string getName ();
+
+        string getPrefix ();
     }
 
     public abstract class Uniform<T> : IUniform {
@@ -26,7 +28,17 @@ namespace physical {
             return name;
         }
 
+        override public string ToString () {
+            return getPrefix() + " " + getName() + "[" + value + "]";
+        }
+
+        public string ToShaderString () {
+            return "uniform " + getPrefix() + " " + getName() + ";\n";
+        }
+
         abstract public void updateGl ( int uniformLocation );
+
+        abstract public string getPrefix ();
     }
 
     public class UniformManager {
@@ -36,6 +48,11 @@ namespace physical {
 
         public void addUniform ( IUniform iUniform ) {
             uniforms.Add( iUniform );
+        }
+
+        public void addUniforms ( params IUniform[] iUniforms ) {
+            foreach ( IUniform iUniform in iUniforms )
+                uniforms.Add( iUniform );
         }
 
         public IUniform getIUniform ( string name ) {
@@ -74,7 +91,7 @@ namespace physical {
         public Uniform1f ( String name, ref float[] value ) : base( name, ref value ) {
         }
 
-        public override void updateGl ( int uniformLocation ) {
+        override public void updateGl ( int uniformLocation ) {
             GL.Uniform1( uniformLocation, value[0] );
         }
     }
@@ -84,7 +101,7 @@ namespace physical {
         public Uniform2f ( String name, ref Vector2 value ) : base( name, ref value ) {
         }
 
-        public override void updateGl ( int uniformLocation ) {
+        override public void updateGl ( int uniformLocation ) {
             GL.Uniform2( uniformLocation, ref value );
         }
     }
@@ -94,7 +111,7 @@ namespace physical {
         public Uniform3f ( String name, ref Vector3 value ) : base( name, ref value ) {
         }
 
-        public override void updateGl ( int uniformLocation ) {
+        override public void updateGl ( int uniformLocation ) {
             GL.Uniform3( uniformLocation, ref value );
         }
     }
@@ -103,7 +120,7 @@ namespace physical {
         public Uniform4f ( String name, ref Vector4 value ) : base( name, ref value ) {
         }
 
-        public override void updateGl ( int uniformLocation ) {
+        override public void updateGl ( int uniformLocation ) {
             GL.Uniform4( uniformLocation, ref value );
         }
     }
@@ -112,7 +129,7 @@ namespace physical {
         public UniformMatrix4 ( String name, Matrix4 value ) : base( name, ref value ) {
         }
 
-        public override void updateGl ( int uniformLocation ) {
+        override public void updateGl ( int uniformLocation ) {
             GL.UniformMatrix4( uniformLocation, false, value );
         }
     }
@@ -122,8 +139,12 @@ namespace physical {
         public Uniform1f ( String name, Value1f value ) : base( name, value ) {
         }
 
-        public override void updateGl ( int uniformLocation ) {
+        override public void updateGl ( int uniformLocation ) {
             GL.Uniform1( uniformLocation, value.Value );
+        }
+
+        override public string getPrefix () {
+            return "float";
         }
     }
 
@@ -131,8 +152,12 @@ namespace physical {
         public Uniform2f ( String name, Vector2f value ) : base( name, value ) {
         }
 
-        public override void updateGl ( int uniformLocation ) {
+        override public void updateGl ( int uniformLocation ) {
             GL.Uniform2( uniformLocation, 1, value.Data );
+        }
+
+        override public string getPrefix () {
+            return "vec2";
         }
     }
 
@@ -141,8 +166,12 @@ namespace physical {
         public Uniform3f ( String name, Vector3f value ) : base( name, value ) {
         }
 
-        public override void updateGl ( int uniformLocation ) {
+        override public void updateGl ( int uniformLocation ) {
             GL.Uniform3( uniformLocation, 1, value.Data );
+        }
+
+        override  public string getPrefix () {
+            return "vec3";
         }
     }
 
@@ -151,8 +180,12 @@ namespace physical {
         public Uniform4f ( String name, Vector4f value ) : base( name, value ) {
         }
 
-        public override void updateGl ( int uniformLocation ) {
+        override public void updateGl ( int uniformLocation ) {
             GL.Uniform4( uniformLocation, 1, value.Data );
+        }
+
+        override  public string getPrefix () {
+            return "vec4";
         }
     }
 
@@ -160,8 +193,12 @@ namespace physical {
         public UniformMatrix4f ( String name, Matrix4f value ) : base( name, value ) {
         }
 
-        public override void updateGl ( int uniformLocation ) {
+        override public void updateGl ( int uniformLocation ) {
             GL.UniformMatrix4( uniformLocation, 1, false, value.Data );
+        }
+
+        override public string getPrefix () {
+            return "mat4";
         }
     }
 }

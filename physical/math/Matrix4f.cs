@@ -3,16 +3,67 @@
 using OpenTK;
 
 namespace physical.math {
-    public class Matrix4f {
-        float[] data;
+    public class Matrix4f : Vector<float> {
+        public const int SIZE = 4 * 4;
+        public static readonly Matrix4f IDENTITY = new Matrix4f( true );
 
-        public float[] Data { get { return data; } }
-
-        public Matrix4f () : this( new float[4 * 4] ) {
+        public Matrix4f () : base( new float[SIZE] ) {
         }
 
-        public Matrix4f ( float[] data ) {
-            this.data = data;
+        public Matrix4f ( bool identity ) : this() {
+            if ( identity ) {
+                data[0] = 1;
+                data[5] = 1;
+                data[10] = 1;
+                data[15] = 1;
+            }
+        }
+
+        public Matrix4f ( float[] data ) : base( data, SIZE ) {
+        }
+
+        public void setIdentity () {
+            data[0] = 1;
+            data[1] = 0;
+            data[2] = 0;
+            data[3] = 0;
+
+            data[4] = 0;
+            data[5] = 1;
+            data[6] = 0;
+            data[7] = 0;
+
+            data[8] = 0;
+            data[9] = 0;
+            data[10] = 1;
+            data[11] = 0;
+
+            data[12] = 0;
+            data[13] = 0;
+            data[14] = 0;
+            data[15] = 1;
+        }
+
+        public void setTranslation ( float x, float y, float z ) {
+            data[12] = x;
+            data[13] = y;
+            data[14] = z;
+        }
+
+        public void setTranslation ( Vector3f vector3f ) {
+            setTranslation( vector3f.X, vector3f.Y, vector3f.Z );
+        }
+
+        public void setTranslationX ( float x ) {
+            data[12] = x;
+        }
+
+        public void setTranslationY ( float y ) {
+            data[13] = y;
+        }
+
+        public void setTranslationZ ( float z ) {
+            data[14] = z;
         }
 
         public void set ( Matrix4 matrix4 ) {

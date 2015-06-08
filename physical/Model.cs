@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
 
+using physical.math;
+
 namespace physical {
     public class Model : Renderable {
         public const int 
@@ -19,9 +21,11 @@ namespace physical {
             { "normals", "vn" },
             { "UVs", "vt" }
         };
-        Matrix4 transform = new Matrix4();
+        Matrix4f transform = new Matrix4f();
 
-        public Matrix4 Transform { get { return transform; } }
+        public Action<Model> UpdateAction { get; set; }
+
+        public Matrix4f Transform { get { return transform; } }
 
         public Texture Texture { get; set; }
 
@@ -40,7 +44,17 @@ namespace physical {
             this.modelData = modelData;
         }
 
+        public Model ( ModelData modelData, Matrix4f sourceTransform ) {
+            this.modelData = modelData;
+            transform.set( sourceTransform );
+        }
+
         public Model ( float[] vertices, float[] normals, float[] uvs, int[] indices ) : this( new ModelData( vertices, normals, uvs, indices ) ) {
+        }
+
+        public void update () {
+            if ( UpdateAction != null )
+                UpdateAction( this );
         }
 
         public void render () {
@@ -97,7 +111,7 @@ namespace physical {
 
         public void writeOBJ ( String filename ) {
             using ( StreamWriter sw = new StreamWriter( filename + ".obj" ) ) {
-                sw.Write( "# created by " + main.APP_NAME + "\n" );
+                sw.Write( "# created by " + PhysicalWindow.APP_NAME + "\n" );
                 int tri_cnt = modelData.VertexCount / VERTEX_COUNT;
                 sw.Write( "# " + modelData.VertexCount + " vertex total == normals == UVs\n"
                 + "# " + tri_cnt + " tris == faces\n\n"

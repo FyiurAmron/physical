@@ -18,6 +18,17 @@ namespace physical.math {
                 throw new InvalidOperationException();
             this.data = data;
         }
+
+        public void set ( T[] data ) {
+            for ( int i = Math.Min( this.data.Length, data.Length ) - 1; i >= 0; i-- )
+                this.data[i] = data[i];
+        }
+
+        public void set ( Vector<T> vector ) {
+            T[] src = vector.data;
+            for ( int i = Math.Min( data.Length, vector.data.Length ) - 1; i >= 0; i-- )
+                data[i] = src[i];
+        }
     }
 }
 

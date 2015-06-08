@@ -48,7 +48,6 @@
     <Compile Include="FloatBuffer.cs" />
     <Compile Include="ModelData.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="Physical.cs" />
     <Compile Include="Uniform.cs" />
     <Compile Include="Texture.cs" />
     <Compile Include="math\Matrix4f.cs" />
@@ -58,6 +57,7 @@
     <Compile Include="math\Value1f.cs" />
     <Compile Include="math\Vector.cs" />
     <Compile Include="math\VectorFloat.cs" />
+    <Compile Include="PhysicalWindow.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
