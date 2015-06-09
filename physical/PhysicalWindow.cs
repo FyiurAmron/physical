@@ -3,7 +3,7 @@
  *
  */
 
-
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
@@ -16,7 +16,6 @@ using OpenTK.Input;
 using physical.math;
 using physical.model;
 using physical.physics;
-using System;
 
 namespace physical {
     public class PhysicalWindow : GameWindow {
@@ -30,6 +29,7 @@ uniform mat4 projectionMatrix;
 uniform mat4 modelviewMatrix;
 uniform mat4 transform;
 uniform float time;
+uniform float random;
 
 in vec3 in_position;
 in vec3 in_normal;
@@ -44,7 +44,10 @@ void main() {
     uv = in_uv;
 
     gl_Position = projectionMatrix * combined * vec4(in_position, 1);
+    //gl_Position.y += random; // earthquake!
+    //gl_Position.y += 4 * random; // BIG earthquake!
     //gl_Position.y *= 0.5 + 0.5 * abs(sin(time+gl_Position.x+gl_Position.z)); // wavy!
+    //gl_Position.y += 2 * abs(sin(time+gl_Position.x+gl_Position.z)); // wavy 2!
 }";
 
         string fragmentShaderSource = @"
@@ -55,6 +58,7 @@ uniform vec3 ambientColor;
 uniform vec3 lightColor;
 uniform vec3 lightDirUnit;
 uniform float time;
+uniform float random;
 
 uniform sampler2D textureSampler;
 
@@ -64,7 +68,8 @@ out vec4 out_fragColor;
 
 void main() {
     //vec3 diffuseColor = vec3(uv,0); // UV debugging
-    vec3 diffuseColor = texture(textureSampler, uv).rgb;
+    //vec3 diffuseColor = texture(textureSampler, uv).rgb;
+    vec3 diffuseColor = texture(textureSampler, uv).rgb * vec3(uv,0) * abs(sin(time*2));
     //vec3 shadedLightColor = lightColor;
     vec3 shadedLightColor = lightColor * clamp( dot( lightDirUnit, normal ), 0.0, 1.0 );
     out_fragColor = vec4( diffuseColor * clamp( shadedLightColor + ambientColor, 0.0, 1.0 ), 1.0 );
@@ -74,8 +79,11 @@ void main() {
             fragmentShaderHandle,
             shaderProgramHandle;
 
+        Random RNG = new Random();
+
         Value1f //
             time = new Value1f(),
+            random = new Value1f(),
             textureSampler = new Value1f( 0 );
         Vector3f //
             ambientColor = new Vector3f(),
@@ -86,27 +94,33 @@ void main() {
             modelviewMatrix = new Matrix4f(),
             transformMatrix = new Matrix4f( true );
 
+        Vector3 basePosition = new Vector3();
+        MouseState lastMouseState;
+
         UniformManager uniformManager = new UniformManager();
         BodyManager bodyManager = new BodyManager();
 
         public static readonly string[] attribs = { "in_position", "in_normal", "in_uv" };
         public static readonly Dictionary<string,int> uniformMap = new Dictionary<string,int>();
         public const string APP_NAME = "Physical";
+        const int SIZE_X = 800, SIZE_Y = 600;
 
-        const float BALL_RADIUS = 1.0f, JUMP_HEIGHT = 10f;
+        const float BALL_RADIUS = 1.0f, JUMP_HEIGHT = 10f, MIN_RADIUS = 10f, BASE_VIEW_HEIGHT = 10f, WORLD_MOVE_FRAME_DELTA = 0.5f;
 
         UniformMatrix4f transformMatrixUniform;
 
         Action<Matrix4f> cameraOnFrame;
 
         public PhysicalWindow ()
-            : base( 800, 600,
-                    new GraphicsMode(), APP_NAME + " v0.0", 0,
+            : base( SIZE_X, SIZE_Y,
+                    new GraphicsMode(), APP_NAME + " v0.1", 0,
                     DisplayDevice.Default, 3, 2,
                     GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug ) {
         }
 
         override protected  void OnLoad ( System.EventArgs e ) {
+            lastMouseState = OpenTK.Input.Mouse.GetState();
+
             Texture angrySquirrelTexture, angryTurtleTexture;
             Texture[] worldTextures;
             Model sphereModel;
@@ -125,7 +139,7 @@ void main() {
                 mvMatrix.set( Matrix4.LookAt( pos, new Vector3( 0, y * 0.5f * ( 1.5f + (float) Math.Sin( time.Value * timeRatio ) ), 0 ), new Vector3( 0, 1, 0 ) ) );
             };
             cameraOnFrame( modelviewMatrix );
-            //cameraOnFrame = null; // enable/disable
+            cameraOnFrame = null; // enable/disable
 
             ambientColor.set( 0.4f, 0.4f, 0.4f );
             lightColor.set( 1.0f, 1.0f, 1.0f );
@@ -251,17 +265,67 @@ void main() {
                 new Uniform3f( "lightColor", lightColor ),
                 new Uniform3f( "lightDirUnit", lightDirUnit ),
                 new Uniform1f( "time", time ),
+                new Uniform1f( "random", random ),
                 new Uniform1f( "textureSamples", textureSampler )
             );
             uniformManager.init( shaderProgramHandle );
         }
 
         override protected  void OnUpdateFrame ( FrameEventArgs e ) {
+            MouseState currentMouseState = OpenTK.Input.Mouse.GetState();
+            int deltaX, deltaY, deltaZ;
+            if ( currentMouseState != lastMouseState ) {
+                deltaX = currentMouseState.X - lastMouseState.X;
+                deltaY = currentMouseState.Y - lastMouseState.Y;
+                deltaZ = currentMouseState.Wheel - lastMouseState.Wheel;
+                lastMouseState = currentMouseState;
+            } else {
+                deltaX = 0;
+                deltaY = 0;
+                deltaZ = 0;
+            }
+
+            KeyboardState keyboardState = OpenTK.Input.Keyboard.GetState();
+            if ( keyboardState.IsKeyDown( Key.W ) ) {
+                basePosition.X += WORLD_MOVE_FRAME_DELTA;
+            }
+            if ( keyboardState.IsKeyDown( Key.S ) ) {
+                basePosition.X -= WORLD_MOVE_FRAME_DELTA;
+            }
+            if ( keyboardState.IsKeyDown( Key.A ) ) {
+                basePosition.Z += WORLD_MOVE_FRAME_DELTA;
+            }
+            if ( keyboardState.IsKeyDown( Key.D ) ) {
+                basePosition.Z -= WORLD_MOVE_FRAME_DELTA;
+            }
+            if ( keyboardState.IsKeyDown( Key.LShift ) ) {
+                basePosition.Y += WORLD_MOVE_FRAME_DELTA;
+            }
+            if ( keyboardState.IsKeyDown( Key.LControl ) ) {
+                basePosition.Y -= WORLD_MOVE_FRAME_DELTA;
+            }
+
             time.Value = ( DateTime.Now.Ticks % ( 100L * 1000 * 1000 * 1000 ) ) / 1E7f;
+            random.Value = (float) RNG.NextDouble();
             //Console.WriteLine( time[0] );
 
             if ( cameraOnFrame != null )
                 cameraOnFrame( modelviewMatrix );
+            else {
+                float radius = currentMouseState.Wheel + MIN_RADIUS;
+
+                Vector3 pos = new Vector3(
+                                  basePosition.X + (float) Math.Sin( -2 * Math.PI / SIZE_X * currentMouseState.X ) * radius,
+                                  basePosition.Y + BASE_VIEW_HEIGHT,
+                                  basePosition.Z + (float) Math.Cos( -2 * Math.PI / SIZE_X * currentMouseState.X ) * radius
+                              );
+                //Console.WriteLine( pos );
+                modelviewMatrix.set( Matrix4.LookAt( pos,
+                    new Vector3( basePosition.X, BASE_VIEW_HEIGHT + basePosition.Y - radius * currentMouseState.Y / SIZE_Y, basePosition.Z ),
+                    new Vector3( 0, 1, 0 ) ) );
+
+                //modelviewMatrix.setTranslation( deltaX, deltaY, deltaZ );
+            }
             
             foreach ( Model m in models ) {
                 m.update();
