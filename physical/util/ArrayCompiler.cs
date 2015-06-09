@@ -19,7 +19,7 @@ namespace physical.util {
 
         protected void checkPos () {
             if ( pos < 0 || pos >= len )
-                throw new IndexOutOfRangeException( ""+pos );
+                throw new IndexOutOfRangeException( "" + pos );
         }
 
         public void setPos ( int pos ) {
@@ -32,11 +32,11 @@ namespace physical.util {
             checkPos();
         }
 
-        public class bytes : ArrayCompiler {
+        public class Bytes : ArrayCompiler {
             protected byte[] arr;
             protected bool littleEndian;
 
-            public bytes ( int len ) : base(len) {
+            public Bytes ( int len ) : base( len ) {
                 arr = new byte[len];
             }
 
@@ -103,12 +103,20 @@ namespace physical.util {
                     throw new InvalidOperationException( "the array hasn't been filled with data yet; pos == " + pos + " ; len == " + len );
                 return arr;
             }
+
+            public byte[] compileTruncate () {
+                if ( pos == len )
+                    return compile();
+                byte[] ret = new byte[pos];
+                System.Array.Copy( arr, ret, pos );
+                return ret;
+            }
         }
 
-        public class floats : ArrayCompiler {
+        public class Floats : ArrayCompiler {
             protected float[] arr;
 
-            public floats ( int len ) :base(len){
+            public Floats ( int len ) : base( len ) {
                 arr = new float[len];
             }
 
@@ -137,11 +145,15 @@ namespace physical.util {
             public float[] compile () {
                 if ( pos != len )// {
                     throw new InvalidOperationException( "the array hasn't been filled with data yet; pos == " + pos + " ; len == " + len );
-                //float[] ret = new float[pos];
-                //System.arraycopy( arr, 0, ret, 0, pos );
-                //return ret;
-                //}
                 return arr;
+            }
+
+            public float[] compileTruncate () {
+                if ( pos == len )
+                    return compile();
+                float[] ret = new float[pos];
+                System.Array.Copy( arr, ret, pos );
+                return ret;
             }
         }
     }

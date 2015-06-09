@@ -10,11 +10,8 @@ namespace physical.model {
         public PrismModel ( float[][] ps, float height ) : base( buildPrism( ps, height ) ) {
         }
 
-        public PrismModel ( float[] p1, float[] p2, float[] p3, float height ) : base( buildPrism( new float[][] {
-                p1,
-                p2,
-                p3
-            }, height ) ) {
+        public PrismModel ( float[] p1, float[] p2, float[] p3, float height ) :
+            base( buildPrism( new float[][] { p1, p2, p3 }, height ) ) {
         }
 
         public static ModelData buildPrism ( float[][] p, float height ) { // p = float[3][3]; // three vert., three coords
@@ -29,9 +26,9 @@ namespace physical.model {
                 for ( int j = 0; j < Model.V_DIMS; j++ )
                     r[i][j] = p[i][j] + rev_norm[j] * height; // since rev normal is set to 'inside', it goes up from the base
 
-            ArrayCompiler.floats vx = new ArrayCompiler.floats( Model.V_DIMS * PRISM_VERTEX_COUNT ),
-            vn = new ArrayCompiler.floats( Model.VN_DIMS * PRISM_VERTEX_COUNT ),
-            vt = new ArrayCompiler.floats( Model.VT_DIMS * PRISM_VERTEX_COUNT );
+            ArrayCompiler.Floats vx = new ArrayCompiler.Floats( Model.V_DIMS * PRISM_VERTEX_COUNT ),
+            vn = new ArrayCompiler.Floats( Model.VN_DIMS * PRISM_VERTEX_COUNT ),
+            vt = new ArrayCompiler.Floats( Model.VT_DIMS * PRISM_VERTEX_COUNT );
 
             for ( int i = 0; i < Model.VERTEX_COUNT; i++ ) {
                 vx.put( p[i] );

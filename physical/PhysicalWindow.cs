@@ -38,7 +38,7 @@ out vec2 uv;
 
 void main() {
     mat4 combined = modelviewMatrix * transform;
-    normal = (combined * vec4(in_normal, 0)).xyz;
+    normal = (transform * vec4(in_normal, 0)).xyz;
     uv = in_uv;
 
     gl_Position = projectionMatrix * combined * vec4(in_position, 1);
@@ -63,8 +63,9 @@ out vec4 out_fragColor;
 void main() {
     //vec3 diffuseColor = vec3(uv,0); // UV debugging
     vec3 diffuseColor = texture(textureSampler, uv).rgb;
-    vec3 lightShadedColor = lightColor * clamp( dot( lightDirUnit, normal ), 0.0, 1.0 );
-    out_fragColor = vec4( ambientColor + diffuseColor * lightShadedColor, 1.0 );
+    //vec3 shadedLightColor = lightColor;
+    vec3 shadedLightColor = lightColor * clamp( dot( lightDirUnit, normal ), 0.0, 1.0 );
+    out_fragColor = vec4( diffuseColor * clamp( shadedLightColor + ambientColor, 0.0, 1.0 ), 1.0 );
 }";
 
         int vertexShaderHandle,
@@ -83,15 +84,21 @@ void main() {
             modelviewMatrix = new Matrix4f(),
             transformMatrix = new Matrix4f( true );
 
-        SphereModel sphereModel;
-        UniformManager uniformManager = new UniformManager();
         Texture angrySquirrelTexture;
+        Texture[] worldTextures;
+        Model sphereModel;
+        RectangleModel[] worldModels;
+        UniformManager uniformManager = new UniformManager();
 
         public static readonly String[] attribs = { "in_position", "in_normal", "in_uv" };
         public static readonly Dictionary<string,int> uniformMap = new Dictionary<string,int>();
         public const string APP_NAME = "Physical";
 
+        const float BALL_RADIUS = 1.0f, JUMP_HEIGHT = 10f;
+
         UniformMatrix4f transformMatrixUniform;
+
+        Action<Matrix4f> cameraOnFrame;
 
         public PhysicalWindow ()
             : base( 800, 600,
@@ -101,32 +108,94 @@ void main() {
         }
 
         override protected  void OnLoad ( System.EventArgs e ) {
-            ambientColor.set( 0.1f, 0.1f, 0.1f );
+            float aspectRatio = ClientSize.Width / (float) ( ClientSize.Height );
+
+            projectionMatrix.set( Matrix4.CreatePerspectiveFieldOfView( (float) Math.PI / 4, aspectRatio, 1, 1000 ) );
+
+            cameraOnFrame = delegate( Matrix4f mvMatrix ) {
+                float radius = 40, y = 20;
+                Vector3 pos = new Vector3(
+                                  (float) Math.Sin( time.Value ) * radius,
+                                  y,
+                                  (float) Math.Cos( time.Value ) * radius );
+                mvMatrix.set( Matrix4.LookAt( pos, new Vector3( 0, y * 0.5f * ( 2 + (float) Math.Sin( time.Value ) ), 0 ), new Vector3( 0, 1, 0 ) ) );
+            };
+            cameraOnFrame( modelviewMatrix );
+            //cameraOnFrame = null; // enable/disable
+
+            ambientColor.set( 0.4f, 0.4f, 0.4f );
             lightColor.set( 1.0f, 1.0f, 1.0f );
-            lightDirUnit.set( 2.0f, 0.5f, 0.5f );
+            lightDirUnit.set( 0.5f, 1.0f, 0.5f );
+            //lightDirUnit.set( 0.1f, 5.0f, 0.1f );
             lightDirUnit.normalize();
             //texture = new Texture( "E:\\drop\\logo-dark.jpg" );
-            angrySquirrelTexture = new Texture( "E:\\drop\\angry-squirrel.png" );
+            angrySquirrelTexture = new Texture( "angry-squirrel.png" );
+
+            worldTextures = new Texture[] { 
+                new Texture( "drzewka-1.png" ),
+                new Texture( "drzewka-3.png" ),
+                new Texture( "sky.png" ),
+                new Texture( "grass.png" ),
+                new Texture( "drzewka-2.png" ),
+                new Texture( "drzewka-4.png" )
+            };
 
             CreateShaders();
 
-            sphereModel = new SphereModel( 1f, 10, 10, true );
-            sphereModel.Transform.setIdentity();
+            sphereModel = new SphereModel( BALL_RADIUS, 10, 10, true );
+            //sphereModel.Transform.setIdentity(); // now made auto
             //sm = new SphereModel( 1.5f, 4, 2, true );
-            sphereModel.init();
-            sphereModel.UpdateAction = delegate(Model model ) {
+
+            sphereModel.UpdateAction = delegate( Model model ) {
                 Matrix4f transform = model.Transform;
                 transform.set( Matrix4.CreateRotationZ( time.Value ) );
-                transform.setTranslationY( (float) Math.Sin( time.Value ) );  
+                //transform.setTranslationY( BALL_RADIUS + JUMP_HEIGHT * 0.5f * (1 + (float) Math.Sin( time.Value )) ); // hover
+                transform.setTranslationY( BALL_RADIUS + JUMP_HEIGHT * (float) Math.Abs( Math.Sin( time.Value ) ) ); // hover
             };
+            sphereModel.Transform.setTranslation( 10, 0, 10 );
             sphereModel.Texture = angrySquirrelTexture;
             //sm.writeOBJ();
             models.Add( sphereModel );
 
-            VSync = VSyncMode.On;
+            float boxX = 100, boxY = 50, boxZ = 100, shiftX = 0.5f * boxX, shiftY = 0.5f * boxY, shiftZ = 0.5f * boxZ;
+            worldModels = new RectangleModel[] {
+                new RectangleModel( Model.OZ, boxX, boxY ),
+                new RectangleModel( Model.OZ, boxX, -boxY ),
+                new RectangleModel( Model.OY, boxX, boxZ ),
+                new RectangleModel( Model.OY, -boxX, boxZ ),
+                new RectangleModel( Model.OZ, -boxX, boxY ),
+                new RectangleModel( Model.OZ, boxX, boxY )
+            };
+            for ( int i = worldModels.Length - 1; i >= 0; i-- ) {
+                Model m = worldModels[i];
+                m.Texture = worldTextures[i];
+                models.Add( m );
+            }
+            Matrix4f trans;
+            trans = worldModels[0].Transform;
+            trans.setZero();
+            trans.Data[2] = 1;
+            trans.Data[5] = 1;
+            trans.Data[8] = 1;
+            trans.Data[15] = 1;
+            trans.setTranslation( shiftX, shiftY, 0 );
+            trans = worldModels[1].Transform;
+            trans.setZero();
+            trans.Data[2] = -1;
+            trans.Data[5] = -1;
+            trans.Data[8] = -1;
+            trans.Data[15] = 1;
+            worldModels[1].Transform.setTranslation( -shiftX, shiftY, 0 );
+            worldModels[2].Transform.setTranslation( 0, boxY, 0 );
+            worldModels[3].Transform.setTranslation( 0, 0, 0 );
+            worldModels[4].Transform.setTranslation( 0, shiftY, shiftZ );
+            worldModels[5].Transform.setTranslation( 0, shiftY, -shiftZ );
 
-            GL.Enable( EnableCap.DepthTest );
-            GL.ClearColor( System.Drawing.Color.DarkOliveGreen );
+            foreach ( Model m in models ) {
+                m.init();
+            }
+
+            VSync = VSyncMode.On;
         }
 
         void CreateShaders () {
@@ -154,12 +223,6 @@ void main() {
             Console.WriteLine( GL.GetProgramInfoLog( shaderProgramHandle ) );
             GL.UseProgram( shaderProgramHandle );
 
-            float aspectRatio = ClientSize.Width / (float) ( ClientSize.Height );
-
-            //Matrix4.CreatePerspectiveFieldOfView( (float) Math.PI / 4, aspectRatio, 1, 100, out projectionMatrix );
-            projectionMatrix.set( Matrix4.CreatePerspectiveFieldOfView( (float) Math.PI / 4, aspectRatio, 1, 100 ) );
-            modelviewMatrix.set( Matrix4.LookAt( new Vector3( -8, 0, -4 ), new Vector3( 0, 0, 0 ), new Vector3( 0, 1, 0 ) ) );
-
             uniformManager.addUniforms( 
                 new UniformMatrix4f( "projectionMatrix", projectionMatrix ),
                 new UniformMatrix4f( "modelviewMatrix", modelviewMatrix ),
@@ -177,6 +240,9 @@ void main() {
             time.Value = ( DateTime.Now.Ticks % ( 100L * 1000 * 1000 * 1000 ) ) / 1E7f;
             //Console.WriteLine( time[0] );
 
+            if ( cameraOnFrame != null )
+                cameraOnFrame( modelviewMatrix );
+            
             foreach ( Model m in models ) {
                 m.update();
             }
@@ -195,18 +261,27 @@ void main() {
         }
 
         override protected  void OnRenderFrame ( FrameEventArgs e ) {
+            GL.Enable( EnableCap.DepthTest );
+            GL.Enable( EnableCap.CullFace );
+
             GL.Viewport( 0, 0, Width, Height );
 
+            GL.ClearColor( System.Drawing.Color.DarkOliveGreen );
             GL.Clear( ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit );
 
             uniformManager.updateGl();
 
             foreach ( Model m in models ) {
                 transformMatrix.set( m.Transform );
+                uniformManager.updateGl( transformMatrixUniform );
                 m.render();
             }
 
             SwapBuffers();
+
+            ErrorCode errorCode = GL.GetError();
+            if ( errorCode != ErrorCode.NoError )
+                Console.WriteLine( errorCode );
         }
     }
 }

@@ -66,6 +66,16 @@ namespace physical.math {
             data[14] = z;
         }
 
+        public void setValue ( float value ) {
+            for ( int i = data.Length - 1; i >= 0; i-- )
+                data[i] = value;
+        }
+
+        public void setZero () {
+            setValue( 0 );
+        }
+
+
         public void set ( Matrix4 matrix4 ) {
             data[0] = matrix4.M11;
             data[1] = matrix4.M12;

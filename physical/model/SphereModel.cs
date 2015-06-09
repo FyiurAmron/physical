@@ -2,8 +2,21 @@
 using physical.util;
 
 namespace physical.model {
-    public class SphereModel : Model {
-        public SphereModel ( float radius, int slices, int stacks, bool outside ) : base( SphereBuilder.build( radius, slices, stacks, outside ) ) {
+    public class SpheroidModel : Model {
+        public SpheroidModel ( float radius, int slices, int stacks, bool outside, bool mirror, bool mirrorCap )
+            : base( SphereBuilder.build( radius, slices, stacks, outside, mirror, mirrorCap ) ) {
+        }
+    }
+
+    public class SphereModel : SpheroidModel {
+        public SphereModel ( float radius, int slices, int stacks, bool outside )
+            : base( radius, slices, stacks, outside, true, true ) {
+        }
+    }
+
+    public class DomeModel : SpheroidModel {
+        public DomeModel ( float radius, int slices, int stacks, bool outside )
+            : base( radius, slices, stacks, outside, false, false ) {
         }
     }
 
@@ -21,7 +34,7 @@ namespace physical.model {
         int slices;
         //int stacks;
         //bool outside;
-        ArrayCompiler.floats[] fac;
+        ArrayCompiler.Floats[] fac;
 
         protected static SphereBuilder instance = new SphereBuilder();
 
@@ -58,7 +71,7 @@ namespace physical.model {
             }
         }
 
-        protected ModelData buildInternal ( float radius, int slices, int stacks, bool outside ) {
+        protected ModelData buildInternal ( float radius, int slices, int stacks, bool outside, bool mirror, bool mirrorCap ) {
             this.radius = radius;
             this.slices = slices;
             if ( stacks < 2 || slices < 2 )
@@ -80,10 +93,10 @@ namespace physical.model {
             ds = 1.0f / slices;
 
             int ops = ( stacks + 1 ) * slices * 6; // stacks +1 for 2 'caps' with half tris at each sphere's 'end'
-            fac = new ArrayCompiler.floats[] {
-                new ArrayCompiler.floats( ops * Model.V_DIMS ),
-                new ArrayCompiler.floats( ops * Model.VN_DIMS ),
-                new ArrayCompiler.floats( ops * Model.VT_DIMS )
+            fac = new ArrayCompiler.Floats[] {
+                new ArrayCompiler.Floats( ops * Model.V_DIMS ),
+                new ArrayCompiler.Floats( ops * Model.VN_DIMS ),
+                new ArrayCompiler.Floats( ops * Model.VT_DIMS )
             };
 
             float drho = Model.PI / stacks, dt = 1.0f / stacks, s, half_ds = ds / 2;
@@ -105,6 +118,10 @@ namespace physical.model {
             rho = drho;
             t = dt;
 
+            if ( !mirror ) {
+                stacks /= 2;
+                stacks++;
+            }
             for ( int i = 1; i < stacks; i++, rho += drho, t += dt ) {
                 setCache();
                 for ( int j = 0; j < slices; j++ )
@@ -114,31 +131,35 @@ namespace physical.model {
                 swapCache();
             }
 
-            rho = Model.PI - drho * CAP_RATIO;
-            t = 1 - dt * CAP_RATIO;
-            setCache();
-            for ( int j = 0; j < slices; j++ )
-                putFAC( 
-                    vCache[0][j], vCache[1][j], vCache[0][j + 1],
-                    vCache[1][j + 1], vCache[0][j + 1], vCache[1][j] );
-            swapCache();
+            if ( mirrorCap ) {
+                rho = Model.PI - drho * CAP_RATIO;
+                t = 1 - dt * CAP_RATIO;
+                setCache();
+                for ( int j = 0; j < slices; j++ )
+                    putFAC( 
+                        vCache[0][j], vCache[1][j], vCache[0][j + 1],
+                        vCache[1][j + 1], vCache[0][j + 1], vCache[1][j] );
+                swapCache();
 
-            s = half_ds; // cap 2
-            for ( int j = 0; j < slices; j++, s += ds ) // last slice with tip
+
+                s = half_ds; // cap 2
+                for ( int j = 0; j < slices; j++, s += ds ) // last slice with tip
                 putFAC(
-                    vCache[0][j],
-                    new float[][] {
-                        new float[]{ 0, -radius * nsign, 0 },
-                        new float[]{ 0, -nsign, 0 },
-                        new float[]{ s, 1 }
-                    },
-                    vCache[0][j + 1] );
-            return new ModelData( fac[0].compile(), fac[1].compile(), fac[2].compile() );
+                        vCache[0][j],
+                        new float[][] {
+                            new float[]{ 0, -radius * nsign, 0 },
+                            new float[]{ 0, -nsign, 0 },
+                            new float[]{ s, 1 }
+                        },
+                        vCache[0][j + 1] );
+            }
+            //return new ModelData( fac[0].compile(), fac[1].compile(), fac[2].compile() );
+            return new ModelData( fac[0].compileTruncate(), fac[1].compileTruncate(), fac[2].compileTruncate() );
             // TODO optimize indices
         }
 
-        public static ModelData build ( float radius, int slices, int stacks, bool outside ) {
-            return instance.buildInternal( radius, slices, stacks, outside );
+        public static ModelData build ( float radius, int slices, int stacks, bool outside, bool mirror, bool mirrorCap ) {
+            return instance.buildInternal( radius, slices, stacks, outside, mirror, mirrorCap );
         }
     }
 }

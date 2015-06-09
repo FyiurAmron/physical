@@ -31,7 +31,7 @@ namespace physical.model {
             0, 0, /* */ 1, 1,/* */ 1, 0, //
         };
 
-        protected readonly Matrix4f transform = new Matrix4f();
+        protected readonly Matrix4f transform = new Matrix4f(true);
 
         public Action<Model> UpdateAction { get; set; }
 

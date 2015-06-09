@@ -35,7 +35,8 @@ namespace physical.model {
             this( ps[0], ps[1], ps[2], seg_u, seg_v ) {
         }
 
-        public RectangleModel ( float[] p1, float[] p2, float[] p3, int seg_u, int seg_v ) : base( buildRectangle( p1, p2, p3, seg_u, seg_v ) ) {
+        public RectangleModel ( float[] p1, float[] p2, float[] p3, int seg_u, int seg_v ) :
+            base( buildRectangle( p1, p2, p3, seg_u, seg_v ) ) {
         }
 
         static protected ModelData buildRectangle ( float[] p1, float[] p2, float[] p3, int seg_u, int seg_v ) {

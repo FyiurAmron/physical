@@ -25,8 +25,8 @@ namespace physical.model {
             primitiveType = PrimitiveType.Lines;
         }
 
-        public WireBoxModel ( float[] sizes )
-            : this( sizes[0], sizes[1], sizes[2] ) {
+        public WireBoxModel ( float[] sizes ) :
+            this( sizes[0], sizes[1], sizes[2] ) {
         }
     }
 }

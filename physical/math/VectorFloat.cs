@@ -43,6 +43,15 @@ namespace physical.math {
         }
         */
 
+        public void setValue ( float value ) {
+            for ( int i = data.Length - 1; i >= 0; i-- )
+                data[i] = value;
+        }
+
+        public void setZero () {
+            setValue( 0 );
+        }
+
         public VectorFloat add ( VectorFloat vector ) {
             add( data, vector.data );
             return this;
@@ -87,7 +96,7 @@ namespace physical.math {
         static public float lengthSq ( float[] data ) {
             float lenSum = 0;
             for ( int i = data.Length - 1; i >= 0; i-- )
-                lenSum += data[i];
+                lenSum += data[i] * data[i];
             return lenSum;
         }
 
