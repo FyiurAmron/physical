@@ -7,9 +7,11 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK;
 
 using physical.math;
+using physical.util;
 
-namespace physical {
+namespace physical.model {
     public class Model : Renderable {
+        public const int OX = 0, OY = 1, OZ = 2;
         public const int 
             VERTEX_COUNT = 3, // because we use triangles
             V_DIMS = 3, VN_DIMS = 3, VT_DIMS = 2, // for reference for other implementing classes
@@ -21,7 +23,15 @@ namespace physical {
             { "normals", "vn" },
             { "UVs", "vt" }
         };
-        Matrix4f transform = new Matrix4f();
+        protected static readonly float[] TRI_VT_PROTO = {
+            1, 1, /* */ 1, 0, /* */ 0, 1
+        };
+        protected static readonly float[] RECT_VT_PROTO = {
+            0, 1, /* */ 1, 1,/* */ 0, 0,
+            0, 0, /* */ 1, 1,/* */ 1, 0, //
+        };
+
+        protected readonly Matrix4f transform = new Matrix4f();
 
         public Action<Model> UpdateAction { get; set; }
 
@@ -29,7 +39,12 @@ namespace physical {
 
         public Texture Texture { get; set; }
 
-        int
+        protected PrimitiveType primitiveType = PrimitiveType.Triangles;
+
+        public PrimitiveType GlPrimitiveType { get { return primitiveType; } set { primitiveType = value; } }
+        // public PrimitiveType PrimitiveType { get; set; } = PrimitiveType.Triangles; // default value for auto-properties; syntax scheduled for C# 6.0 (late 2015)
+
+        protected int
             vaoHandle,
             positionVboHandle,
             normalVboHandle,
@@ -49,7 +64,12 @@ namespace physical {
             transform.set( sourceTransform );
         }
 
-        public Model ( float[] vertices, float[] normals, float[] uvs, int[] indices ) : this( new ModelData( vertices, normals, uvs, indices ) ) {
+        public Model ( float[] vertices, float[] normals, float[] uvs, int[] indices )
+            : this( new ModelData( vertices, normals, uvs, indices ) ) {
+        }
+
+        public Model ( Buffer<float> vertices, Buffer<float> normals, Buffer<float> uvs, Buffer<int> indices )
+            : this( new ModelData( vertices.Array, normals.Array, uvs.Array, indices.Array ) ) {
         }
 
         public void update () {
@@ -62,7 +82,7 @@ namespace physical {
                 GL.BindTexture( TextureTarget.Texture2D, Texture.Handle );
             GL.BindVertexArray( vaoHandle );
 
-            GL.DrawElements( PrimitiveType.Triangles, modelData.Indices.Length,
+            GL.DrawElements( primitiveType, modelData.Indices.Length,
                 DrawElementsType.UnsignedInt, IntPtr.Zero );
         }
 
@@ -97,7 +117,7 @@ namespace physical {
         }
 
         protected void writeOBJ_buf ( StreamWriter sw, int bufNr ) {
-            var fb = new FloatBuffer( modelData.Data[bufNr] );
+            var fb = new Buffer<float>( modelData.Data[bufNr] );
             sw.Write( "#\n# " + OBJ_section_name[bufNr, 0] + "\n#\n\n" );
             String prefix = OBJ_section_name[bufNr, 1] + " ";
             if ( bufNr != 2 )

@@ -5,7 +5,7 @@
 using System;
 using biz.ritter.javapi.lang;
 
-namespace physical {
+namespace physical.util {
     abstract public class ArrayCompiler {
         protected int pos, len;
 
@@ -58,7 +58,7 @@ namespace physical {
             public void put ( byte[] v ) {
 //      if ( pos + v.length > len )
 //        throw new IllegalStateException( "array buffer overflow; v.length == " + v.length + " ; pos == " + pos + " ; len == " + len );
-                SystemJ.arraycopy( v, 0, arr, pos, v.Length );
+                System.Array.Copy( v, 0, arr, pos, v.Length );
                 pos += v.Length;
             }
 
@@ -126,7 +126,7 @@ namespace physical {
             public void put ( float[] fs ) {
 //      if ( pos + fs.length > len )
 //        throw new IllegalStateException( "array buffer overflow; fs.length == " + fs.length + " ; pos == " + pos + " ; len == " + len );
-                SystemJ.arraycopy( fs, 0, arr, pos, fs.Length );
+                System.Array.Copy( fs, 0, arr, pos, fs.Length );
                 pos += fs.Length;
             }
 

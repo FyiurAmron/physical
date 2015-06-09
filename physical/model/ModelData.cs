@@ -1,6 +1,7 @@
 ﻿using System;
+using physical.util;
 
-namespace physical {
+namespace physical.model {
     public class ModelData {
         int[] indices;
         float[] vertices, normals, uvs;
@@ -24,6 +25,14 @@ namespace physical {
             for ( int i = 0; i < vertexCount; i++ )
                 indices[i] = i;
             return indices;
+        }
+
+        public ModelData ( Buffer<float> vertices, Buffer<float> normals, Buffer<float> uvs )
+            : this( vertices.Array, normals.Array, uvs.Array, createDefaultIndices( vertices.Size / Model.V_DIMS ) ) {
+        }
+
+        public ModelData ( Buffer<float> vertices, Buffer<float> normals, Buffer<float> uvs, Buffer<int> indices )
+            : this( vertices.Array, normals.Array, uvs.Array, indices.Array ) {
         }
 
         public ModelData ( float[] vertices, float[] normals, float[] uvs )

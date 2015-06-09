@@ -1,6 +1,7 @@
 ﻿using System;
+using physical.util;
 
-namespace physical {
+namespace physical.model {
     public class SphereModel : Model {
         public SphereModel ( float radius, int slices, int stacks, bool outside ) : base( SphereBuilder.build( radius, slices, stacks, outside ) ) {
         }
@@ -21,6 +22,11 @@ namespace physical {
         //int stacks;
         //bool outside;
         ArrayCompiler.floats[] fac;
+
+        protected static SphereBuilder instance = new SphereBuilder();
+
+        protected SphereBuilder () {
+        }
 
         protected void swapCache () {
             float[][][] tmp = vCache[0];
@@ -52,7 +58,7 @@ namespace physical {
             }
         }
 
-        protected ModelData buildFloats ( float radius, int slices, int stacks, bool outside ) {
+        protected ModelData buildInternal ( float radius, int slices, int stacks, bool outside ) {
             this.radius = radius;
             this.slices = slices;
             if ( stacks < 2 || slices < 2 )
@@ -132,7 +138,7 @@ namespace physical {
         }
 
         public static ModelData build ( float radius, int slices, int stacks, bool outside ) {
-            return new SphereBuilder().buildFloats( radius, slices, stacks, outside );
+            return instance.buildInternal( radius, slices, stacks, outside );
         }
     }
 }

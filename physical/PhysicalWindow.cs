@@ -14,6 +14,7 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using physical.math;
+using physical.model;
 
 namespace physical {
     public class PhysicalWindow : GameWindow {
