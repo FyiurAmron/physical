@@ -2,8 +2,9 @@
 
  @author poponuro
  */
-using System;
+
 using biz.ritter.javapi.lang;
+using System;
 
 namespace physical.util {
     abstract public class ArrayCompiler {

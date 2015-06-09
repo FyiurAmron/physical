@@ -65,6 +65,7 @@
     <Compile Include="physics\Body.cs" />
     <Compile Include="physics\PlaneBody.cs" />
     <Compile Include="physics\SphereBody.cs" />
+    <Compile Include="physics\BodyManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

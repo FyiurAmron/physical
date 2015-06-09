@@ -5,7 +5,7 @@ namespace physical.util {
         int position;
         T[] array;
 
-        public int Size{ get; set; }
+        public int Size { get; set; }
 
         public T[] Array { get { return array; } }
 

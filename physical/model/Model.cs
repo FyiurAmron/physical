@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
@@ -8,6 +8,7 @@ using OpenTK;
 
 using physical.math;
 using physical.util;
+using System;
 
 namespace physical.model {
     public class Model : Renderable {
@@ -18,7 +19,7 @@ namespace physical.model {
             VS_COUNT = 3;
         // v, vn, vt; 3 total.
         public const float PI = (float) Math.PI, TWO_PI = 2 * PI;
-        protected static readonly String[,] OBJ_section_name = {
+        protected static readonly string[,] OBJ_section_name = {
             { "vertices", "v" },
             { "normals", "vn" },
             { "UVs", "vt" }

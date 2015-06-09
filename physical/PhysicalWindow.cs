@@ -3,7 +3,7 @@
  *
  */
 
-using System;
+
 using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
@@ -15,6 +15,8 @@ using OpenTK.Input;
 
 using physical.math;
 using physical.model;
+using physical.physics;
+using System;
 
 namespace physical {
     public class PhysicalWindow : GameWindow {
@@ -84,13 +86,10 @@ void main() {
             modelviewMatrix = new Matrix4f(),
             transformMatrix = new Matrix4f( true );
 
-        Texture angrySquirrelTexture;
-        Texture[] worldTextures;
-        Model sphereModel;
-        RectangleModel[] worldModels;
         UniformManager uniformManager = new UniformManager();
+        BodyManager bodyManager = new BodyManager();
 
-        public static readonly String[] attribs = { "in_position", "in_normal", "in_uv" };
+        public static readonly string[] attribs = { "in_position", "in_normal", "in_uv" };
         public static readonly Dictionary<string,int> uniformMap = new Dictionary<string,int>();
         public const string APP_NAME = "Physical";
 
@@ -108,17 +107,22 @@ void main() {
         }
 
         override protected  void OnLoad ( System.EventArgs e ) {
+            Texture angrySquirrelTexture, angryTurtleTexture;
+            Texture[] worldTextures;
+            Model sphereModel;
+            RectangleModel[] worldModels;
+
             float aspectRatio = ClientSize.Width / (float) ( ClientSize.Height );
 
             projectionMatrix.set( Matrix4.CreatePerspectiveFieldOfView( (float) Math.PI / 4, aspectRatio, 1, 1000 ) );
 
             cameraOnFrame = delegate( Matrix4f mvMatrix ) {
-                float radius = 40, y = 20;
+                float radius = 40, y = 20, timeRatio = 0.5f;
                 Vector3 pos = new Vector3(
-                                  (float) Math.Sin( time.Value ) * radius,
+                                  (float) Math.Sin( time.Value * timeRatio ) * radius,
                                   y,
-                                  (float) Math.Cos( time.Value ) * radius );
-                mvMatrix.set( Matrix4.LookAt( pos, new Vector3( 0, y * 0.5f * ( 2 + (float) Math.Sin( time.Value ) ), 0 ), new Vector3( 0, 1, 0 ) ) );
+                                  (float) Math.Cos( time.Value * timeRatio ) * radius );
+                mvMatrix.set( Matrix4.LookAt( pos, new Vector3( 0, y * 0.5f * ( 1.5f + (float) Math.Sin( time.Value * timeRatio ) ), 0 ), new Vector3( 0, 1, 0 ) ) );
             };
             cameraOnFrame( modelviewMatrix );
             //cameraOnFrame = null; // enable/disable
@@ -129,22 +133,38 @@ void main() {
             //lightDirUnit.set( 0.1f, 5.0f, 0.1f );
             lightDirUnit.normalize();
             //texture = new Texture( "E:\\drop\\logo-dark.jpg" );
-            angrySquirrelTexture = new Texture( "angry-squirrel.png" );
+            angrySquirrelTexture = new Texture( "gfx/angry-squirrel.png" );
+            angryTurtleTexture = new Texture( "gfx/angry-turtle.png" );
 
             worldTextures = new Texture[] { 
-                new Texture( "drzewka-1.png" ),
-                new Texture( "drzewka-3.png" ),
-                new Texture( "sky.png" ),
-                new Texture( "grass.png" ),
-                new Texture( "drzewka-2.png" ),
-                new Texture( "drzewka-4.png" )
+                new Texture( "gfx/drzewka-1.png" ),
+                new Texture( "gfx/drzewka-3.png" ),
+                new Texture( "gfx/sky.png" ),
+                new Texture( "gfx/grass.png" ),
+                new Texture( "gfx/drzewka-2.png" ),
+                new Texture( "gfx/drzewka-4.png" )
             };
 
             CreateShaders();
 
-            sphereModel = new SphereModel( BALL_RADIUS, 10, 10, true );
+            sphereModel = new SphereModel( BALL_RADIUS * 5, 10, 10, true );
+            sphereModel.Texture = angryTurtleTexture;
             //sphereModel.Transform.setIdentity(); // now made auto
             //sm = new SphereModel( 1.5f, 4, 2, true );
+
+            sphereModel.UpdateAction = delegate( Model model ) {
+                Matrix4f transform = model.Transform;
+                transform.set( Matrix4.CreateRotationX( -time.Value ) );
+                //transform.setTranslationY( BALL_RADIUS + JUMP_HEIGHT * 0.5f * (1 + (float) Math.Sin( time.Value )) ); // hover
+                transform.setTranslation( -10, BALL_RADIUS * 5, 5 ); // roll
+            };
+            sphereModel.UpdateAction( sphereModel );
+
+            //sm.writeOBJ();
+            models.Add( sphereModel );
+
+            sphereModel = new SphereModel( BALL_RADIUS, 20, 20, true );
+            sphereModel.Texture = angrySquirrelTexture;
 
             sphereModel.UpdateAction = delegate( Model model ) {
                 Matrix4f transform = model.Transform;
@@ -152,10 +172,10 @@ void main() {
                 //transform.setTranslationY( BALL_RADIUS + JUMP_HEIGHT * 0.5f * (1 + (float) Math.Sin( time.Value )) ); // hover
                 transform.setTranslationY( BALL_RADIUS + JUMP_HEIGHT * (float) Math.Abs( Math.Sin( time.Value ) ) ); // hover
             };
-            sphereModel.Transform.setTranslation( 10, 0, 10 );
-            sphereModel.Texture = angrySquirrelTexture;
+            sphereModel.UpdateAction( sphereModel );
             //sm.writeOBJ();
             models.Add( sphereModel );
+
 
             float boxX = 100, boxY = 50, boxZ = 100, shiftX = 0.5f * boxX, shiftY = 0.5f * boxY, shiftZ = 0.5f * boxZ;
             worldModels = new RectangleModel[] {
@@ -246,6 +266,8 @@ void main() {
             foreach ( Model m in models ) {
                 m.update();
             }
+
+            bodyManager.update();
 
             /*
             Matrix4 rotation = Matrix4.CreateRotationZ( (float) e.Time * 4 ), source = modelviewMatrix.toMatrix4(), result = new Matrix4();

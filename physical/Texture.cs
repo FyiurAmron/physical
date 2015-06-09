@@ -1,7 +1,8 @@
 ﻿using System;
-using OpenTK.Graphics.OpenGL;
 using System.Drawing;
 using System.Drawing.Imaging;
+
+using OpenTK.Graphics.OpenGL;
 
 namespace physical {
     public class Texture {
@@ -16,7 +17,7 @@ namespace physical {
         }
 
         static int LoadTexture ( string filename ) {
-            if ( String.IsNullOrEmpty( filename ) )
+            if ( string.IsNullOrEmpty( filename ) )
                 throw new ArgumentException( filename );
 
             int id = GL.GenTexture();

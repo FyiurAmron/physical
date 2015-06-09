@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 using OpenTK.Graphics.OpenGL;
 using physical.util;
 

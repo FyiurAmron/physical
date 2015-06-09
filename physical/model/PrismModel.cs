@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 using physical.math;
 using physical.util;
 

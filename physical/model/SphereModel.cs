@@ -1,5 +1,6 @@
-﻿using System;
+﻿
 using physical.util;
+using System;
 
 namespace physical.model {
     public class SpheroidModel : Model {

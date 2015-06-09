@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 
 namespace physical.math {
     public class Vector4f : VectorFloat {

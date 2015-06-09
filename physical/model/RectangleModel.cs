@@ -1,5 +1,6 @@
-﻿using System;
+﻿
 using physical.math;
+using System;
 
 namespace physical.model {
     public class RectangleModel : Model {

@@ -1,6 +1,7 @@
-﻿using System;
+﻿
 using OpenTK.Graphics.OpenGL;
 using physical.util;
+using System;
 
 namespace physical.model {
     public class HexagonModel : Model {

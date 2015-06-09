@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 using System.Collections.Generic;
 
 using OpenTK;
@@ -19,7 +19,7 @@ namespace physical {
         protected T value;
         protected string name;
 
-        public Uniform ( String name, T value ) {
+        public Uniform ( string name, T value ) {
             this.value = value;
             this.name = name;
         }
@@ -136,7 +136,7 @@ namespace physical {
     */
 
     public class Uniform1f : Uniform<Value1f> {
-        public Uniform1f ( String name, Value1f value ) : base( name, value ) {
+        public Uniform1f ( string name, Value1f value ) : base( name, value ) {
         }
 
         override public void updateGl ( int uniformLocation ) {
@@ -149,7 +149,7 @@ namespace physical {
     }
 
     public class Uniform2f : Uniform<Vector2f> {
-        public Uniform2f ( String name, Vector2f value ) : base( name, value ) {
+        public Uniform2f ( string name, Vector2f value ) : base( name, value ) {
         }
 
         override public void updateGl ( int uniformLocation ) {
@@ -163,7 +163,7 @@ namespace physical {
 
 
     public class Uniform3f : Uniform<Vector3f> {
-        public Uniform3f ( String name, Vector3f value ) : base( name, value ) {
+        public Uniform3f ( string name, Vector3f value ) : base( name, value ) {
         }
 
         override public void updateGl ( int uniformLocation ) {
@@ -177,7 +177,7 @@ namespace physical {
 
 
     public class Uniform4f : Uniform<Vector4f> {
-        public Uniform4f ( String name, Vector4f value ) : base( name, value ) {
+        public Uniform4f ( string name, Vector4f value ) : base( name, value ) {
         }
 
         override public void updateGl ( int uniformLocation ) {
@@ -190,7 +190,7 @@ namespace physical {
     }
 
     public class UniformMatrix4f : Uniform<Matrix4f> {
-        public UniformMatrix4f ( String name, Matrix4f value ) : base( name, value ) {
+        public UniformMatrix4f ( string name, Matrix4f value ) : base( name, value ) {
         }
 
         override public void updateGl ( int uniformLocation ) {

@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 using physical.util;
 
 namespace physical.model {
