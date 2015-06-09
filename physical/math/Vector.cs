@@ -19,6 +19,10 @@ namespace physical.math {
             this.data = data;
         }
 
+        public Vector ( Vector<T> vector ) : this( vector.Data.Length ) {
+            set( vector );
+        }
+
         public void set ( T[] data ) {
             for ( int i = Math.Min( this.data.Length, data.Length ) - 1; i >= 0; i-- )
                 this.data[i] = data[i];

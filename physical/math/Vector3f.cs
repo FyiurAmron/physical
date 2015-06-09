@@ -10,6 +10,9 @@ namespace physical.math {
 
         public float Z { get { return Data[2]; } set { Data[2] = value; } }
 
+        public Vector3f ( Vector3f vector ) : base( vector ) {
+        }
+
         public Vector3f ( float[] data ) : base( data, SIZE ) {
         }
 
@@ -23,6 +26,13 @@ namespace physical.math {
             X = x;
             Y = y;
             Z = z;
+            return this;
+        }
+
+        public Vector3f scale ( float x, float y, float z ) {
+            X *= x;
+            Y *= y;
+            Z *= z;
             return this;
         }
 

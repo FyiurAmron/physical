@@ -12,6 +12,9 @@ namespace physical.math {
 
         public float W { get { return Data[3]; } set { Data[3] = value; } }
 
+        public Vector4f ( Vector4f vector ) : base( vector ) {
+        }
+
         public Vector4f ( float[] data ) : base( data, SIZE ) {
         }
 

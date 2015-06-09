@@ -8,6 +8,9 @@ namespace physical.math {
 
         public float Y { get { return Data[1]; } set { Data[1] = value; } }
 
+        public Vector2f ( Vector2f vector ) : base( vector ) {
+        }
+
         public Vector2f ( float[] data ) : base( data, SIZE ) {
         }
 
