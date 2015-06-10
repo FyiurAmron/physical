@@ -68,8 +68,8 @@ out vec4 out_fragColor;
 
 void main() {
     //vec3 diffuseColor = vec3(uv,0); // UV debugging
-    //vec3 diffuseColor = texture(textureSampler, uv).rgb;
-    vec3 diffuseColor = texture(textureSampler, uv).rgb * vec3(uv,0) * abs(sin(time*2));
+    vec3 diffuseColor = texture(textureSampler, uv).rgb;
+    //vec3 diffuseColor = texture(textureSampler, uv).rgb * vec3(uv,0) * abs(sin(time*2)); // Groovy Disco TM
     //vec3 shadedLightColor = lightColor;
     vec3 shadedLightColor = lightColor * clamp( dot( lightDirUnit, normal ), 0.0, 1.0 );
     out_fragColor = vec4( diffuseColor * clamp( shadedLightColor + ambientColor, 0.0, 1.0 ), 1.0 );
@@ -285,18 +285,26 @@ void main() {
                 deltaZ = 0;
             }
 
+            float
+            xFactor = (float) Math.Sin( -2 * Math.PI / SIZE_X * currentMouseState.X ),
+            zFactor = (float) Math.Cos( -2 * Math.PI / SIZE_X * currentMouseState.X );
+
             KeyboardState keyboardState = OpenTK.Input.Keyboard.GetState();
             if ( keyboardState.IsKeyDown( Key.W ) ) {
-                basePosition.X += WORLD_MOVE_FRAME_DELTA;
+                basePosition.X -= WORLD_MOVE_FRAME_DELTA * xFactor;
+                basePosition.Z -= WORLD_MOVE_FRAME_DELTA * zFactor;
             }
             if ( keyboardState.IsKeyDown( Key.S ) ) {
-                basePosition.X -= WORLD_MOVE_FRAME_DELTA;
+                basePosition.X += WORLD_MOVE_FRAME_DELTA * xFactor;
+                basePosition.Z += WORLD_MOVE_FRAME_DELTA * zFactor;
             }
             if ( keyboardState.IsKeyDown( Key.A ) ) {
-                basePosition.Z += WORLD_MOVE_FRAME_DELTA;
+                basePosition.X -= WORLD_MOVE_FRAME_DELTA * zFactor;
+                basePosition.Z += WORLD_MOVE_FRAME_DELTA * xFactor;
             }
             if ( keyboardState.IsKeyDown( Key.D ) ) {
-                basePosition.Z -= WORLD_MOVE_FRAME_DELTA;
+                basePosition.X += WORLD_MOVE_FRAME_DELTA * zFactor;
+                basePosition.Z -= WORLD_MOVE_FRAME_DELTA * xFactor;
             }
             if ( keyboardState.IsKeyDown( Key.LShift ) ) {
                 basePosition.Y += WORLD_MOVE_FRAME_DELTA;
@@ -315,9 +323,9 @@ void main() {
                 float radius = currentMouseState.Wheel + MIN_RADIUS;
 
                 Vector3 pos = new Vector3(
-                                  basePosition.X + (float) Math.Sin( -2 * Math.PI / SIZE_X * currentMouseState.X ) * radius,
+                                  basePosition.X + xFactor * radius,
                                   basePosition.Y + BASE_VIEW_HEIGHT,
-                                  basePosition.Z + (float) Math.Cos( -2 * Math.PI / SIZE_X * currentMouseState.X ) * radius
+                                  basePosition.Z + zFactor * radius
                               );
                 //Console.WriteLine( pos );
                 modelviewMatrix.set( Matrix4.LookAt( pos,
