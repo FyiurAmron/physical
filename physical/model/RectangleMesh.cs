@@ -80,19 +80,19 @@ namespace physical.model {
             size_1 *= 0.5f;
             size_2 *= 0.5f;
             switch ( axis ) {
-            case OX:
+            case Vector3f.OX:
                 return new float[][] {
                     new float[]{ 0, -size_1, -size_2 },
                     new float[]{ 0, size_1, -size_2 },
                     new float[]{ 0, -size_1, size_2 }
                 };
-            case OY:
+            case Vector3f.OY:
                 return new float[][] {
                     new float[]{ -size_1, 0, -size_2 },
                     new float[]{ size_1, 0, -size_2 },
                     new float[]{ -size_1, 0, size_2 }
                 };
-            case OZ:
+            case Vector3f.OZ:
                 return new float[][] {
                     new float[]{ -size_1, -size_2, 0 },
                     new float[]{ size_1, -size_2, 0 },

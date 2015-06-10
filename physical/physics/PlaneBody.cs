@@ -1,13 +1,23 @@
-﻿
+﻿using physical.math;
 
 namespace physical.physics {
     public class PlaneBody : Body {
-        public PlaneBody () {
-            // temporarily assume it's a n=(0,1,0), o=(0,0,0) plane
+        public Plane3f Plane3f { get; set; }
+
+        public PlaneBody ( Plane3f plane3f ) {
+            this.Plane3f = plane3f;
             FixedPosition = true;
         }
 
+        public PlaneBody () : this( new Plane3f() ) {
+        }
+
+        public PlaneBody ( Vector3f normal, float distanceToOrigin ) : this( new Plane3f( normal, distanceToOrigin ) ) {
+        }
+
         override public void checkCollision ( Body body ) {
+            if ( body.FixedPosition )
+                return;
             body.checkCollision( this ); // no sensible code available here
         }
     }

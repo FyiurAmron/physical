@@ -52,6 +52,23 @@ namespace physical.math {
             setValue( 0 );
         }
 
+
+        public float lengthSq () {
+            return lengthSq( data );
+        }
+
+        public float length () {
+            return length( data );
+        }
+
+        public void normalize () {
+            normalize( data );
+        }
+
+        public float dot ( VectorFloat vector ) {
+            return dot( data, vector.data );
+        }
+
         public VectorFloat add ( VectorFloat vector ) {
             add( data, vector.data );
             return this;
@@ -62,8 +79,21 @@ namespace physical.math {
             return this;
         }
 
+        public VectorFloat invert () {
+            return scale( -1f );
+        }
+
+        public VectorFloat getInverted () {
+            return getScaled( -1f );
+        }
+
         public VectorFloat scale ( float scaler ) {
             scale( data, scaler );
+            return this;
+        }
+
+        public VectorFloat scale ( VectorFloat scaler ) {
+            scale( data, scaler.data );
             return this;
         }
 
@@ -79,16 +109,8 @@ namespace physical.math {
             return new VectorFloat( getScaled( data, scaler ) );
         }
 
-        public float lengthSq () {
-            return lengthSq( data );
-        }
-
-        public float length () {
-            return length( data );
-        }
-
-        public void normalize () {
-            normalize( data );
+        public VectorFloat getScaled ( VectorFloat scaler ) {
+            return new VectorFloat( getScaled( data, scaler.data ) );
         }
 
         // static part
@@ -119,34 +141,6 @@ namespace physical.math {
             return sum;
         }
 
-        static public float[] scale ( float[] v, float f ) {
-            for ( int i = v.Length - 1; i >= 0; i-- )
-                v[i] *= f;
-            return v;
-        }
-
-        static public float[] scale ( float[] v, float[] f ) {
-            for ( int i = v.Length - 1; i >= 0; i-- )
-                v[i] *= f[i];
-            return v;
-        }
-
-        static public float[] getScaled ( float[] v, float f ) {
-            int i = v.Length;
-            float[] ret = new float[i];
-            for ( i--; i >= 0; i-- )
-                ret[i] = v[i] * f;
-            return ret;
-        }
-
-        static public float[] getScaled ( float[] v, float[] f ) {
-            int i = v.Length;
-            float[] ret = new float[i];
-            for ( i--; i >= 0; i-- )
-                ret[i] = v[i] * f[i];
-            return ret;
-        }
-
         static public float[] add ( float[] v, float[] t ) { // translate with t
             for ( int i = v.Length - 1; i >= 0; i-- )
                 v[i] += t[i];
@@ -172,6 +166,35 @@ namespace physical.math {
             float[] ret = new float[i];
             for ( i--; i >= 0; i-- )
                 ret[i] = v[i] - t[i];
+            return ret;
+        }
+
+
+        static public float[] scale ( float[] v, float f ) {
+            for ( int i = v.Length - 1; i >= 0; i-- )
+                v[i] *= f;
+            return v;
+        }
+
+        static public float[] scale ( float[] v, float[] f ) {
+            for ( int i = v.Length - 1; i >= 0; i-- )
+                v[i] *= f[i];
+            return v;
+        }
+
+        static public float[] getScaled ( float[] v, float f ) {
+            int i = v.Length;
+            float[] ret = new float[i];
+            for ( i--; i >= 0; i-- )
+                ret[i] = v[i] * f;
+            return ret;
+        }
+
+        static public float[] getScaled ( float[] v, float[] f ) {
+            int i = v.Length;
+            float[] ret = new float[i];
+            for ( i--; i >= 0; i-- )
+                ret[i] = v[i] * f[i];
             return ret;
         }
     }

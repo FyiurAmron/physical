@@ -12,7 +12,7 @@ namespace physical.physics {
         Vector3f gravity = new Vector3f( 0, -9.81f, 0 );
         //Vector3f gravity = new Vector3f( 0, -9.81f / 10, 0 );
 
-        Vector3f Gravity { get { return gravity; } set { gravity.set( value ); } }
+        public Vector3f Gravity { get { return gravity; } set { gravity.set( value ); } }
 
 
         public BodyManager () {
@@ -27,23 +27,23 @@ namespace physical.physics {
 
         public void addBody ( Body body, Mesh mesh ) {
             addBody( body );
-            mesh.Transform.setTranslation( body.Position );
+            mesh.Transform.set( body.Transform );
             bodyMeshMap.Add( body, mesh );
         }
 
         public void update ( float deltaT ) {
             for ( int i = bodies.Count - 1; i >= 0; i-- ) {
                 Body body1 = bodies[i];
+                for ( int j = i - 1; j >= 0; j-- ) {
+                    body1.checkCollision( bodies[j] );
+                }
                 if ( body1.FixedPosition )
                     continue;
                 body1.Acceleration.add( gravity );
                 body1.timeStep( deltaT );
-                for ( int j = i - 1; j >= 0; j-- ) {
-                    body1.checkCollision( bodies[j] );
-                }
 
                 if ( bodyMeshMap.ContainsKey( body1 ) )
-                    bodyMeshMap[body1].Transform.setTranslation( body1.Position );
+                    bodyMeshMap[body1].Transform.set( body1.Transform );
             }
         }
     }

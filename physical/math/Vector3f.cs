@@ -3,6 +3,7 @@
 namespace physical.math {
     public class Vector3f : VectorFloat {
         public const int SIZE = 3;
+        public const int OX = 0, OY = 1, OZ = 2;
 
         public float X { get { return Data[0]; } set { Data[0] = value; } }
 
@@ -34,6 +35,10 @@ namespace physical.math {
             Y *= y;
             Z *= z;
             return this;
+        }
+
+        public float dot ( float x, float y, float z ) {
+            return X * x + Y * y + Z * z;
         }
 
         public Vector3f cross ( Vector3f vector ) {

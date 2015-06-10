@@ -12,7 +12,6 @@ using System;
 
 namespace physical.model {
     public class Mesh : Renderable {
-        public const int OX = 0, OY = 1, OZ = 2;
         public const int 
             VERTEX_COUNT = 3, // because we use triangles
             V_DIMS = 3, VN_DIMS = 3, VT_DIMS = 2, // for reference for other implementing classes

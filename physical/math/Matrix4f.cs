@@ -3,9 +3,15 @@
 using OpenTK;
 
 namespace physical.math {
-    public class Matrix4f : Vector<float> {
+    public class Matrix4f : /*Vector<float>*/ VectorFloat {
         public const int SIZE = 4 * 4;
         public static readonly Matrix4f IDENTITY = new Matrix4f( true );
+
+        public float TranslationX { get { return data[12]; } set { data[12] = value; } }
+
+        public float TranslationY { get { return data[13]; } set { data[13] = value; } }
+
+        public float TranslationZ { get { return data[14]; } set { data[14] = value; } }
 
         public Matrix4f () : base( new float[SIZE] ) {
         }
@@ -20,6 +26,9 @@ namespace physical.math {
         }
 
         public Matrix4f ( float[] data ) : base( data, SIZE ) {
+        }
+
+        public Matrix4f ( Matrix4f matrix4f ) : base( matrix4f ) {
         }
 
         public void setIdentity () {
@@ -44,26 +53,32 @@ namespace physical.math {
             data[15] = 1;
         }
 
+        public void addTranslation ( float x, float y, float z ) {
+            data[12] += x;
+            data[13] += y;
+            data[14] += z;
+        }
+
+        public void addTranslation ( float[] translation ) {
+            addTranslation( translation[0], translation[1], translation[2] );
+        }
+
+        public void addTranslation ( VectorFloat vectorFloat ) {
+            addTranslation( vectorFloat.Data );
+        }
+
         public void setTranslation ( float x, float y, float z ) {
             data[12] = x;
             data[13] = y;
             data[14] = z;
         }
 
-        public void setTranslation ( Vector3f vector3f ) {
-            setTranslation( vector3f.X, vector3f.Y, vector3f.Z );
+        public void setTranslation ( float[] translation ) {
+            setTranslation( translation[0], translation[1], translation[2] );
         }
 
-        public void setTranslationX ( float x ) {
-            data[12] = x;
-        }
-
-        public void setTranslationY ( float y ) {
-            data[13] = y;
-        }
-
-        public void setTranslationZ ( float z ) {
-            data[14] = z;
+        public void setTranslation ( VectorFloat vectorFloat ) {
+            setTranslation( vectorFloat.Data );
         }
 
         public void setScaleAndRotation ( Matrix4 matrix4 ) {
@@ -79,7 +94,7 @@ namespace physical.math {
             data[9] = matrix4.M32;
             data[10] = matrix4.M33;
         }
-
+        /*
         public void setValue ( float value ) {
             for ( int i = data.Length - 1; i >= 0; i-- )
                 data[i] = value;
@@ -88,7 +103,7 @@ namespace physical.math {
         public void setZero () {
             setValue( 0 );
         }
-
+*/
 
         public void set ( Matrix4 matrix4 ) {
             data[0] = matrix4.M11;

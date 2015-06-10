@@ -66,6 +66,7 @@
     <Compile Include="model\RectangleMesh.cs" />
     <Compile Include="model\SphereMesh.cs" />
     <Compile Include="model\WireBoxMesh.cs" />
+    <Compile Include="math\Plane3f.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

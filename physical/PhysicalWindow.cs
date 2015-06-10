@@ -121,9 +121,9 @@ void main() {
         override protected  void OnLoad ( System.EventArgs e ) {
             lastMouseState = OpenTK.Input.Mouse.GetState();
 
-            Texture angrySquirrelTexture, angryTurtleTexture;
+            Texture angrySquirrelTexture, angryTurtleTexture, angryDilloTexture;
             Texture[] worldTextures;
-            Mesh squirrelMesh, turtleMesh;
+            Mesh squirrelMesh, turtleMesh, dilloMesh;
             RectangleMesh[] worldMeshes;
 
             float aspectRatio = ClientSize.Width / (float) ( ClientSize.Height );
@@ -149,6 +149,7 @@ void main() {
             //texture = new Texture( "E:\\drop\\logo-dark.jpg" );
             angrySquirrelTexture = new Texture( "gfx/angry-squirrel.png" );
             angryTurtleTexture = new Texture( "gfx/angry-turtle.png" );
+            angryDilloTexture = new Texture( "gfx/angry-armadillo.png" );
 
             worldTextures = new Texture[] { 
                 new Texture( "gfx/drzewka-1.png" ),
@@ -161,25 +162,9 @@ void main() {
 
             CreateShaders();
 
-            turtleMesh = new SphereMesh( BALL_RADIUS * 5, 10, 10, true );
-            turtleMesh.Texture = angryTurtleTexture;
-            //sphereModel.Transform.setIdentity(); // now made auto
-            //sm = new SphereModel( 1.5f, 4, 2, true );
-
-            turtleMesh.UpdateAction = delegate( Mesh model ) {
-                Matrix4f transform = model.Transform;
-                transform.setScaleAndRotation( Matrix4.CreateRotationX( -time.Value ) );
-                //transform.setTranslationY( BALL_RADIUS + JUMP_HEIGHT * 0.5f * (1 + (float) Math.Sin( time.Value )) ); // hover
-                //transform.setTranslation( -10, BALL_RADIUS * 5, 5 ); // roll
-            };
-            turtleMesh.UpdateAction( turtleMesh );
-
-            //sm.writeOBJ();
-            meshes.Add( turtleMesh );
-
             squirrelMesh = new SphereMesh( BALL_RADIUS, 20, 20, true );
             squirrelMesh.Texture = angrySquirrelTexture;
-
+            /*
             squirrelMesh.UpdateAction = delegate( Mesh model ) {
                 Matrix4f transform = model.Transform;
                 transform.setScaleAndRotation( Matrix4.CreateRotationZ( time.Value ) );
@@ -187,18 +172,40 @@ void main() {
                 //transform.setTranslationY( BALL_RADIUS + JUMP_HEIGHT * (float) Math.Abs( Math.Sin( time.Value ) ) ); // hover
             };
             squirrelMesh.UpdateAction( squirrelMesh );
+            */
             //sm.writeOBJ();
             meshes.Add( squirrelMesh );
 
+            turtleMesh = new SphereMesh( BALL_RADIUS * 5, 10, 10, true );
+            turtleMesh.Texture = angryTurtleTexture;
+            /*
+            turtleMesh.UpdateAction = delegate( Mesh model ) {
+                Matrix4f transform = model.Transform;
+                transform.setScaleAndRotation( Matrix4.CreateRotationX( -time.Value ) );
+            };
+            turtleMesh.UpdateAction( turtleMesh );
+            */
+            meshes.Add( turtleMesh );
+
+            dilloMesh = new SphereMesh( BALL_RADIUS * 2, 20, 20, true );
+            dilloMesh.Texture = angryDilloTexture;
+            /*
+            dilloMesh.UpdateAction = delegate( Mesh model ) {
+                Matrix4f transform = model.Transform;
+                transform.setScaleAndRotation( Matrix4.CreateRotationX( -time.Value ) );
+            };
+            dilloMesh.UpdateAction( dilloMesh );
+            */
+            meshes.Add( dilloMesh );
 
             float boxX = 100, boxY = 50, boxZ = 100, shiftX = 0.5f * boxX, shiftY = 0.5f * boxY, shiftZ = 0.5f * boxZ;
             worldMeshes = new RectangleMesh[] {
-                new RectangleMesh( Mesh.OZ, boxX, boxY ),
-                new RectangleMesh( Mesh.OZ, boxX, -boxY ),
-                new RectangleMesh( Mesh.OY, boxX, boxZ ),
-                new RectangleMesh( Mesh.OY, -boxX, boxZ ),
-                new RectangleMesh( Mesh.OZ, -boxX, boxY ),
-                new RectangleMesh( Mesh.OZ, boxX, boxY )
+                new RectangleMesh( Vector3f.OZ, boxX, boxY ),
+                new RectangleMesh( Vector3f.OZ, boxX, -boxY ),
+                new RectangleMesh( Vector3f.OY, boxX, boxZ ),
+                new RectangleMesh( Vector3f.OY, -boxX, boxZ ),
+                new RectangleMesh( Vector3f.OZ, -boxX, boxY ),
+                new RectangleMesh( Vector3f.OZ, boxX, boxY )
             };
             for ( int i = worldMeshes.Length - 1; i >= 0; i-- ) {
                 Mesh m = worldMeshes[i];
@@ -229,14 +236,25 @@ void main() {
                 m.init();
             }
 
-            PlaneBody groundPlane = new PlaneBody();
             SphereBody squirrelBody = new SphereBody( 1, BALL_RADIUS );
-            squirrelBody.Position.set( 40, 40, 40 );
+            squirrelBody.Transform.setTranslation( 40, 40, 40 );
+            squirrelBody.RotationSpeed = 1f;
             SphereBody turtleBody = new SphereBody( 25, BALL_RADIUS * 5 );
-            turtleBody.Position.set( 0, 20, 0 );
-            bodyManager.addBody( groundPlane );
+            turtleBody.Transform.setTranslation( 0, 20, 0 );
+            turtleBody.RotationSpeed = 1f;
+            SphereBody dilloBody = new SphereBody( 25, BALL_RADIUS * 2 );
+            dilloBody.Transform.setTranslation( -20, 100, -30 );
+            dilloBody.RotationSpeed = 1f;
+            bodyManager.addBody( new PlaneBody( new Plane3f( new Vector3f( 0, 1, 0 ), 0 ) ) );
+            bodyManager.addBody( new PlaneBody( new Plane3f( new Vector3f( 0, -1, 0 ), -boxY ) ) );
+            bodyManager.addBody( new PlaneBody( new Plane3f( new Vector3f( 1, 0, 0 ), shiftX ) ) );
+            bodyManager.addBody( new PlaneBody( new Plane3f( new Vector3f( -1, 0, 0 ), -shiftX ) ) );
+            bodyManager.addBody( new PlaneBody( new Plane3f( new Vector3f( 0, 0, 1 ), shiftZ ) ) );
+            bodyManager.addBody( new PlaneBody( new Plane3f( new Vector3f( 0, 0, -1 ), -shiftZ ) ) );
+
             bodyManager.addBody( squirrelBody, squirrelMesh );
             bodyManager.addBody( turtleBody, turtleMesh );
+            bodyManager.addBody( dilloBody, dilloMesh );
 
             VSync = VSyncMode.On;
         }
@@ -280,7 +298,7 @@ void main() {
             uniformManager.init( shaderProgramHandle );
         }
 
-        override protected  void OnUpdateFrame ( FrameEventArgs e ) {
+        override protected void OnUpdateFrame ( FrameEventArgs e ) {
             MouseState currentMouseState = OpenTK.Input.Mouse.GetState();
             int deltaX, deltaY, deltaZ;
             if ( currentMouseState != lastMouseState ) {
@@ -322,6 +340,13 @@ void main() {
                 basePosition.Y -= WORLD_MOVE_FRAME_DELTA;
             }
 
+            if ( keyboardState.IsKeyDown( Key.G ) ) {
+                bodyManager.Gravity.invert();
+            }
+            if ( keyboardState.IsKeyDown( Key.R ) ) {
+                bodyManager.Gravity.rotate( 1 );
+            }
+
             time.Value = ( DateTime.Now.Ticks % ( 100L * 1000 * 1000 * 1000 ) ) / 1E7f;
             random.Value = (float) RNG.NextDouble();
             //Console.WriteLine( time[0] );
@@ -348,10 +373,10 @@ void main() {
                 m.update();
             }
 
-            if ( keyboardState.IsKeyDown( Key.T ) ) {
-                //bodyManager.update( (float) e.Time );
-                bodyManager.update( (float) 1f / 60 );
-            }
+            //if ( keyboardState.IsKeyDown( Key.T ) ) {
+            bodyManager.update( (float) e.Time );
+            //bodyManager.update( (float) 1f / 60 );
+            //}
 
             /*
             ambientColor.Y = (float) Math.Sin( time.Value );
@@ -363,7 +388,7 @@ void main() {
                 Exit();
         }
 
-        override protected  void OnRenderFrame ( FrameEventArgs e ) {
+        override protected void OnRenderFrame ( FrameEventArgs e ) {
             GL.Enable( EnableCap.DepthTest );
             GL.Enable( EnableCap.CullFace );
 
