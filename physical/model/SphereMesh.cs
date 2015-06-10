@@ -3,20 +3,20 @@ using physical.util;
 using System;
 
 namespace physical.model {
-    public class SpheroidModel : Model {
-        public SpheroidModel ( float radius, int slices, int stacks, bool outside, bool mirror, bool mirrorCap )
+    public class SpheroidMesh : Mesh {
+        public SpheroidMesh ( float radius, int slices, int stacks, bool outside, bool mirror, bool mirrorCap )
             : base( SphereBuilder.build( radius, slices, stacks, outside, mirror, mirrorCap ) ) {
         }
     }
 
-    public class SphereModel : SpheroidModel {
-        public SphereModel ( float radius, int slices, int stacks, bool outside )
+    public class SphereMesh : SpheroidMesh {
+        public SphereMesh ( float radius, int slices, int stacks, bool outside )
             : base( radius, slices, stacks, outside, true, true ) {
         }
     }
 
-    public class DomeModel : SpheroidModel {
-        public DomeModel ( float radius, int slices, int stacks, bool outside )
+    public class DomeMesh : SpheroidMesh {
+        public DomeMesh ( float radius, int slices, int stacks, bool outside )
             : base( radius, slices, stacks, outside, false, false ) {
         }
     }
@@ -51,7 +51,7 @@ namespace physical.model {
         protected void putFAC ( params float[][][] vs ) {
             if ( vs != null )
                 foreach ( float[][] fv in vs )
-                    for ( int i = 0; i < Model.VS_COUNT; i++ )
+                    for ( int i = 0; i < Mesh.VS_COUNT; i++ )
                         fac[i].put( fv[i] );
         }
 
@@ -72,7 +72,7 @@ namespace physical.model {
             }
         }
 
-        protected ModelData buildInternal ( float radius, int slices, int stacks, bool outside, bool mirror, bool mirrorCap ) {
+        protected MeshData buildInternal ( float radius, int slices, int stacks, bool outside, bool mirror, bool mirrorCap ) {
             this.radius = radius;
             this.slices = slices;
             if ( stacks < 2 || slices < 2 )
@@ -83,7 +83,7 @@ namespace physical.model {
 
             msTheta = new float[slices + 1];
             cTheta = new float[slices + 1];
-            float theta = 0, dtheta = Model.TWO_PI / slices;
+            float theta = 0, dtheta = Mesh.TWO_PI / slices;
             for ( int j = 0; j <= slices; j++, theta += dtheta ) {
                 msTheta[j] = -(float) Math.Sin( theta );
                 cTheta[j] = (float) Math.Cos( theta );
@@ -95,12 +95,12 @@ namespace physical.model {
 
             int ops = ( stacks + 1 ) * slices * 6; // stacks +1 for 2 'caps' with half tris at each sphere's 'end'
             fac = new ArrayCompiler.Floats[] {
-                new ArrayCompiler.Floats( ops * Model.V_DIMS ),
-                new ArrayCompiler.Floats( ops * Model.VN_DIMS ),
-                new ArrayCompiler.Floats( ops * Model.VT_DIMS )
+                new ArrayCompiler.Floats( ops * Mesh.V_DIMS ),
+                new ArrayCompiler.Floats( ops * Mesh.VN_DIMS ),
+                new ArrayCompiler.Floats( ops * Mesh.VT_DIMS )
             };
 
-            float drho = Model.PI / stacks, dt = 1.0f / stacks, s, half_ds = ds / 2;
+            float drho = Mesh.PI / stacks, dt = 1.0f / stacks, s, half_ds = ds / 2;
             rho = drho * CAP_RATIO;
             t = dt * CAP_RATIO; // this is reversed vs GLU, since we draw top-to-bottom (correct alignment)
 
@@ -133,7 +133,7 @@ namespace physical.model {
             }
 
             if ( mirrorCap ) {
-                rho = Model.PI - drho * CAP_RATIO;
+                rho = Mesh.PI - drho * CAP_RATIO;
                 t = 1 - dt * CAP_RATIO;
                 setCache();
                 for ( int j = 0; j < slices; j++ )
@@ -155,11 +155,11 @@ namespace physical.model {
                         vCache[0][j + 1] );
             }
             //return new ModelData( fac[0].compile(), fac[1].compile(), fac[2].compile() );
-            return new ModelData( fac[0].compileTruncate(), fac[1].compileTruncate(), fac[2].compileTruncate() );
+            return new MeshData( fac[0].compileTruncate(), fac[1].compileTruncate(), fac[2].compileTruncate() );
             // TODO optimize indices
         }
 
-        public static ModelData build ( float radius, int slices, int stacks, bool outside, bool mirror, bool mirrorCap ) {
+        public static MeshData build ( float radius, int slices, int stacks, bool outside, bool mirror, bool mirrorCap ) {
             return instance.buildInternal( radius, slices, stacks, outside, mirror, mirrorCap );
         }
     }

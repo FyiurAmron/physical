@@ -66,6 +66,20 @@ namespace physical.math {
             data[14] = z;
         }
 
+        public void setScaleAndRotation ( Matrix4 matrix4 ) {
+            data[0] = matrix4.M11;
+            data[1] = matrix4.M12;
+            data[2] = matrix4.M13;
+
+            data[4] = matrix4.M21;
+            data[5] = matrix4.M22;
+            data[6] = matrix4.M23;
+
+            data[8] = matrix4.M31;
+            data[9] = matrix4.M32;
+            data[10] = matrix4.M33;
+        }
+
         public void setValue ( float value ) {
             for ( int i = data.Length - 1; i >= 0; i-- )
                 data[i] = value;

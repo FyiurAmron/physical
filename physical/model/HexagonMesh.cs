@@ -4,7 +4,7 @@ using physical.util;
 using System;
 
 namespace physical.model {
-    public class HexagonModel : Model {
+    public class HexagonMesh : Mesh {
 
         public const float A = 2, HALF_A = A * 0.5f;
         public static readonly float H = (float) Math.Sqrt( 3 ) * HALF_A;
@@ -61,19 +61,19 @@ namespace physical.model {
 
      @param vt UV mapping (vt1 = crop mode, vt2 = stretch mode)
      */
-        protected HexagonModel ( float[] vt ) : base( v, vn, vt, ix ) {
+        protected HexagonMesh ( float[] vt ) : base( v, vn, vt, ix ) {
             primitiveType = PrimitiveType.TriangleFan;
         }
 
-        protected static readonly HexagonModel //
-            singletonCropped = new HexagonModel( vt1 ),
-            singletonStretched = new HexagonModel( vt2 );
+        protected static readonly HexagonMesh //
+            singletonCropped = new HexagonMesh( vt1 ),
+            singletonStretched = new HexagonMesh( vt2 );
 
-        static public HexagonModel getSingleton ( bool stretched ) {
+        static public HexagonMesh getSingleton ( bool stretched ) {
             return stretched ? singletonStretched : singletonCropped;
         }
 
-        static public HexagonModel getSingleton () {
+        static public HexagonMesh getSingleton () {
             return singletonCropped;
         }
     }

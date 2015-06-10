@@ -19,7 +19,7 @@ using physical.physics;
 
 namespace physical {
     public class PhysicalWindow : GameWindow {
-        HashSet<Model> models = new HashSet<Model>();
+        HashSet<Mesh> meshes = new HashSet<Mesh>();
 
         string vertexShaderSource = @"
 #version 140
@@ -123,8 +123,8 @@ void main() {
 
             Texture angrySquirrelTexture, angryTurtleTexture;
             Texture[] worldTextures;
-            Model sphereModel;
-            RectangleModel[] worldModels;
+            Mesh squirrelMesh, turtleMesh;
+            RectangleMesh[] worldMeshes;
 
             float aspectRatio = ClientSize.Width / (float) ( ClientSize.Height );
 
@@ -161,73 +161,82 @@ void main() {
 
             CreateShaders();
 
-            sphereModel = new SphereModel( BALL_RADIUS * 5, 10, 10, true );
-            sphereModel.Texture = angryTurtleTexture;
+            turtleMesh = new SphereMesh( BALL_RADIUS * 5, 10, 10, true );
+            turtleMesh.Texture = angryTurtleTexture;
             //sphereModel.Transform.setIdentity(); // now made auto
             //sm = new SphereModel( 1.5f, 4, 2, true );
 
-            sphereModel.UpdateAction = delegate( Model model ) {
+            turtleMesh.UpdateAction = delegate( Mesh model ) {
                 Matrix4f transform = model.Transform;
-                transform.set( Matrix4.CreateRotationX( -time.Value ) );
+                transform.setScaleAndRotation( Matrix4.CreateRotationX( -time.Value ) );
                 //transform.setTranslationY( BALL_RADIUS + JUMP_HEIGHT * 0.5f * (1 + (float) Math.Sin( time.Value )) ); // hover
-                transform.setTranslation( -10, BALL_RADIUS * 5, 5 ); // roll
+                //transform.setTranslation( -10, BALL_RADIUS * 5, 5 ); // roll
             };
-            sphereModel.UpdateAction( sphereModel );
+            turtleMesh.UpdateAction( turtleMesh );
 
             //sm.writeOBJ();
-            models.Add( sphereModel );
+            meshes.Add( turtleMesh );
 
-            sphereModel = new SphereModel( BALL_RADIUS, 20, 20, true );
-            sphereModel.Texture = angrySquirrelTexture;
+            squirrelMesh = new SphereMesh( BALL_RADIUS, 20, 20, true );
+            squirrelMesh.Texture = angrySquirrelTexture;
 
-            sphereModel.UpdateAction = delegate( Model model ) {
+            squirrelMesh.UpdateAction = delegate( Mesh model ) {
                 Matrix4f transform = model.Transform;
-                transform.set( Matrix4.CreateRotationZ( time.Value ) );
+                transform.setScaleAndRotation( Matrix4.CreateRotationZ( time.Value ) );
                 //transform.setTranslationY( BALL_RADIUS + JUMP_HEIGHT * 0.5f * (1 + (float) Math.Sin( time.Value )) ); // hover
-                transform.setTranslationY( BALL_RADIUS + JUMP_HEIGHT * (float) Math.Abs( Math.Sin( time.Value ) ) ); // hover
+                //transform.setTranslationY( BALL_RADIUS + JUMP_HEIGHT * (float) Math.Abs( Math.Sin( time.Value ) ) ); // hover
             };
-            sphereModel.UpdateAction( sphereModel );
+            squirrelMesh.UpdateAction( squirrelMesh );
             //sm.writeOBJ();
-            models.Add( sphereModel );
+            meshes.Add( squirrelMesh );
 
 
             float boxX = 100, boxY = 50, boxZ = 100, shiftX = 0.5f * boxX, shiftY = 0.5f * boxY, shiftZ = 0.5f * boxZ;
-            worldModels = new RectangleModel[] {
-                new RectangleModel( Model.OZ, boxX, boxY ),
-                new RectangleModel( Model.OZ, boxX, -boxY ),
-                new RectangleModel( Model.OY, boxX, boxZ ),
-                new RectangleModel( Model.OY, -boxX, boxZ ),
-                new RectangleModel( Model.OZ, -boxX, boxY ),
-                new RectangleModel( Model.OZ, boxX, boxY )
+            worldMeshes = new RectangleMesh[] {
+                new RectangleMesh( Mesh.OZ, boxX, boxY ),
+                new RectangleMesh( Mesh.OZ, boxX, -boxY ),
+                new RectangleMesh( Mesh.OY, boxX, boxZ ),
+                new RectangleMesh( Mesh.OY, -boxX, boxZ ),
+                new RectangleMesh( Mesh.OZ, -boxX, boxY ),
+                new RectangleMesh( Mesh.OZ, boxX, boxY )
             };
-            for ( int i = worldModels.Length - 1; i >= 0; i-- ) {
-                Model m = worldModels[i];
+            for ( int i = worldMeshes.Length - 1; i >= 0; i-- ) {
+                Mesh m = worldMeshes[i];
                 m.Texture = worldTextures[i];
-                models.Add( m );
+                meshes.Add( m );
             }
             Matrix4f trans;
-            trans = worldModels[0].Transform;
+            trans = worldMeshes[0].Transform;
             trans.setZero();
             trans.Data[2] = 1;
             trans.Data[5] = 1;
             trans.Data[8] = 1;
             trans.Data[15] = 1;
             trans.setTranslation( shiftX, shiftY, 0 );
-            trans = worldModels[1].Transform;
+            trans = worldMeshes[1].Transform;
             trans.setZero();
             trans.Data[2] = -1;
             trans.Data[5] = -1;
             trans.Data[8] = -1;
             trans.Data[15] = 1;
-            worldModels[1].Transform.setTranslation( -shiftX, shiftY, 0 );
-            worldModels[2].Transform.setTranslation( 0, boxY, 0 );
-            worldModels[3].Transform.setTranslation( 0, 0, 0 );
-            worldModels[4].Transform.setTranslation( 0, shiftY, shiftZ );
-            worldModels[5].Transform.setTranslation( 0, shiftY, -shiftZ );
+            worldMeshes[1].Transform.setTranslation( -shiftX, shiftY, 0 );
+            worldMeshes[2].Transform.setTranslation( 0, boxY, 0 );
+            worldMeshes[3].Transform.setTranslation( 0, 0, 0 );
+            worldMeshes[4].Transform.setTranslation( 0, shiftY, shiftZ );
+            worldMeshes[5].Transform.setTranslation( 0, shiftY, -shiftZ );
 
-            foreach ( Model m in models ) {
+            foreach ( Mesh m in meshes ) {
                 m.init();
             }
+
+            PlaneBody groundPlane = new PlaneBody();
+            SphereBody squirrelBody = new SphereBody( 1, BALL_RADIUS );
+            squirrelBody.Position.set( 40, 40, 40 );
+            SphereBody turtleBody = new SphereBody( 25, BALL_RADIUS * 5 );
+            turtleBody.Position.set( 0, 20, 0 );
+            bodyManager.addBody( groundPlane );
+            bodyManager.addBody( squirrelBody, squirrelMesh );
+            bodyManager.addBody( turtleBody, turtleMesh );
 
             VSync = VSyncMode.On;
         }
@@ -335,16 +344,16 @@ void main() {
                 //modelviewMatrix.setTranslation( deltaX, deltaY, deltaZ );
             }
             
-            foreach ( Model m in models ) {
+            foreach ( Mesh m in meshes ) {
                 m.update();
             }
 
-            bodyManager.update();
+            if ( keyboardState.IsKeyDown( Key.T ) ) {
+                //bodyManager.update( (float) e.Time );
+                bodyManager.update( (float) 1f / 60 );
+            }
 
             /*
-            Matrix4 rotation = Matrix4.CreateRotationZ( (float) e.Time * 4 ), source = modelviewMatrix.toMatrix4(), result = new Matrix4();
-            Matrix4.Mult( ref rotation, ref source, out result );
-            modelviewMatrix.set( result );
             ambientColor.Y = (float) Math.Sin( time.Value );
             Console.WriteLine( ambientColor.Y );
             */
@@ -365,7 +374,7 @@ void main() {
 
             uniformManager.updateGl();
 
-            foreach ( Model m in models ) {
+            foreach ( Mesh m in meshes ) {
                 transformMatrix.set( m.Transform );
                 uniformManager.updateGl( transformMatrixUniform );
                 m.render();

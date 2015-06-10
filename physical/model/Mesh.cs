@@ -11,7 +11,7 @@ using physical.util;
 using System;
 
 namespace physical.model {
-    public class Model : Renderable {
+    public class Mesh : Renderable {
         public const int OX = 0, OY = 1, OZ = 2;
         public const int 
             VERTEX_COUNT = 3, // because we use triangles
@@ -34,7 +34,7 @@ namespace physical.model {
 
         protected readonly Matrix4f transform = new Matrix4f(true);
 
-        public Action<Model> UpdateAction { get; set; }
+        public Action<Mesh> UpdateAction { get; set; }
 
         public Matrix4f Transform { get { return transform; } }
 
@@ -52,25 +52,25 @@ namespace physical.model {
             uvsVboHandle,
             eboHandle;
 
-        protected readonly ModelData modelData;
+        protected readonly MeshData modelData;
 
-        public ModelData ModelData{ get { return modelData; } }
+        public MeshData ModelData{ get { return modelData; } }
 
-        public Model ( ModelData modelData ) {
+        public Mesh ( MeshData modelData ) {
             this.modelData = modelData;
         }
 
-        public Model ( ModelData modelData, Matrix4f sourceTransform ) {
+        public Mesh ( MeshData modelData, Matrix4f sourceTransform ) {
             this.modelData = modelData;
             transform.set( sourceTransform );
         }
 
-        public Model ( float[] vertices, float[] normals, float[] uvs, int[] indices )
-            : this( new ModelData( vertices, normals, uvs, indices ) ) {
+        public Mesh ( float[] vertices, float[] normals, float[] uvs, int[] indices )
+            : this( new MeshData( vertices, normals, uvs, indices ) ) {
         }
 
-        public Model ( Buffer<float> vertices, Buffer<float> normals, Buffer<float> uvs, Buffer<int> indices )
-            : this( new ModelData( vertices.Array, normals.Array, uvs.Array, indices.Array ) ) {
+        public Mesh ( Buffer<float> vertices, Buffer<float> normals, Buffer<float> uvs, Buffer<int> indices )
+            : this( new MeshData( vertices.Array, normals.Array, uvs.Array, indices.Array ) ) {
         }
 
         public void update () {
@@ -110,9 +110,9 @@ namespace physical.model {
 
             vaoHandle = GL.GenVertexArray();
             GL.BindVertexArray( vaoHandle );
-            EnableAttribute( 0, positionVboHandle, Model.V_DIMS );
-            EnableAttribute( 1, normalVboHandle, Model.VN_DIMS );
-            EnableAttribute( 2, uvsVboHandle, Model.VT_DIMS );
+            EnableAttribute( 0, positionVboHandle, Mesh.V_DIMS );
+            EnableAttribute( 1, normalVboHandle, Mesh.VN_DIMS );
+            EnableAttribute( 2, uvsVboHandle, Mesh.VT_DIMS );
             GL.BindBuffer( BufferTarget.ElementArrayBuffer, eboHandle );
             GL.BindVertexArray( 0 );
         }

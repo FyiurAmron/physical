@@ -3,14 +3,14 @@ using physical.math;
 using System;
 
 namespace physical.model {
-    public class RectangleModel : Model {
+    public class RectangleMesh : Mesh {
         /**
      Creates a new OXY rectangle of given sizes, centered at OY axis.
 
      @param size_x
      @param size_y
      */
-        public RectangleModel ( float size_x, float size_y ) :
+        public RectangleMesh ( float size_x, float size_y ) :
             this( new float[]{ -size_x / 2, 0, 0 }, new float[]{ size_x / 2, 0, 0 }, new float[] {
                 -size_x / 2,
                 size_y,
@@ -25,33 +25,33 @@ namespace physical.model {
      @param size_1 first size (X or Y)
      @param size_2 second size (Y or Z)
      */
-        public RectangleModel ( int axis, float size_1, float size_2 ) :
+        public RectangleMesh ( int axis, float size_1, float size_2 ) :
             this( buildAxedRectangle( axis, size_1, size_2 ), 1, 1 ) {
         }
 
         /* public rectangle( float[] p1, float[] p2, float[] p3 ) {
      super( prepare_rectangle_arrs( p1, p2, p3, 1, 1 ) );
      } */
-        public RectangleModel ( float[][] ps, int seg_u, int seg_v ) :
+        public RectangleMesh ( float[][] ps, int seg_u, int seg_v ) :
             this( ps[0], ps[1], ps[2], seg_u, seg_v ) {
         }
 
-        public RectangleModel ( float[] p1, float[] p2, float[] p3, int seg_u, int seg_v ) :
+        public RectangleMesh ( float[] p1, float[] p2, float[] p3, int seg_u, int seg_v ) :
             base( buildRectangle( p1, p2, p3, seg_u, seg_v ) ) {
         }
 
-        static protected ModelData buildRectangle ( float[] p1, float[] p2, float[] p3, int seg_u, int seg_v ) {
-            int v_total = 2 * Model.VERTEX_COUNT * seg_u * seg_v; // 2 tris for each seg, 6 verts per seg
-            float[] vx = new float[Model.V_DIMS * v_total],
-            vn = new float[Model.VN_DIMS * v_total],
-            vt = new float[Model.VT_DIMS * v_total],
+        static protected MeshData buildRectangle ( float[] p1, float[] p2, float[] p3, int seg_u, int seg_v ) {
+            int v_total = 2 * Mesh.VERTEX_COUNT * seg_u * seg_v; // 2 tris for each seg, 6 verts per seg
+            float[] vx = new float[Mesh.V_DIMS * v_total],
+            vn = new float[Mesh.VN_DIMS * v_total],
+            vt = new float[Mesh.VT_DIMS * v_total],
             u = VectorFloat.getDiff( p2, p1 ),
             v = VectorFloat.getDiff( p3, p1 );
 
             float u0, u1, v0, v1; // calculated in-place to avoid loss of precision for large surfaces
-            for ( int i = 0, i_step = 2 * Model.VERTEX_COUNT * Model.V_DIMS, i_u = 0, k; i_u < seg_u; i_u++ )
+            for ( int i = 0, i_step = 2 * Mesh.VERTEX_COUNT * Mesh.V_DIMS, i_u = 0, k; i_u < seg_u; i_u++ )
                 for ( int i_v = 0; i_v < seg_v; i_v++, i += i_step )
-                    for ( int j = 0; j < Model.V_DIMS; j++ ) {
+                    for ( int j = 0; j < Mesh.V_DIMS; j++ ) {
                         k = i + j;
                         u0 = u[j] * i_u / seg_u;
                         u1 = u[j] * ( i_u + 1 ) / seg_u;
@@ -59,21 +59,21 @@ namespace physical.model {
                         v1 = v[j] * ( i_v + 1 ) / seg_v;
 
                         vx[k] = p1[j] + u0 + v0;
-                        vx[k + Model.V_DIMS] = p1[j] + u1 + v0;
-                        vx[k + 2 * Model.V_DIMS] = p1[j] + u0 + v1;
-                        vx[k + 3 * Model.V_DIMS] = vx[k + 2 * Model.V_DIMS];
-                        vx[k + 4 * Model.V_DIMS] = vx[k + Model.V_DIMS];
-                        vx[k + 5 * Model.V_DIMS] = p1[j] + u1 + v1;
+                        vx[k + Mesh.V_DIMS] = p1[j] + u1 + v0;
+                        vx[k + 2 * Mesh.V_DIMS] = p1[j] + u0 + v1;
+                        vx[k + 3 * Mesh.V_DIMS] = vx[k + 2 * Mesh.V_DIMS];
+                        vx[k + 4 * Mesh.V_DIMS] = vx[k + Mesh.V_DIMS];
+                        vx[k + 5 * Mesh.V_DIMS] = p1[j] + u1 + v1;
                     }
 
-            for ( int i = 0, max = Model.VT_DIMS * v_total, vt_step = Model.RECT_VT_PROTO.Length; i < max; i += vt_step )
-                System.Array.Copy( Model.RECT_VT_PROTO, 0, vt, i, vt_step );
+            for ( int i = 0, max = Mesh.VT_DIMS * v_total, vt_step = Mesh.RECT_VT_PROTO.Length; i < max; i += vt_step )
+                System.Array.Copy( Mesh.RECT_VT_PROTO, 0, vt, i, vt_step );
 
             float[] n = Vector3f.getNormal( p1, p2, p3 ); // the normal should be equal for the whole rectangle
-            for ( int i = 0, max = Model.VN_DIMS * v_total; i < max; i += Model.VN_DIMS )
-                System.Array.Copy( n, 0, vn, i, Model.VN_DIMS );
+            for ( int i = 0, max = Mesh.VN_DIMS * v_total; i < max; i += Mesh.VN_DIMS )
+                System.Array.Copy( n, 0, vn, i, Mesh.VN_DIMS );
 
-            return new ModelData( vx, vn, vt );
+            return new MeshData( vx, vn, vt );
         }
 
         static protected float[][] buildAxedRectangle ( int axis, float size_1, float size_2 ) {

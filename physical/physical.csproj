@@ -53,19 +53,19 @@
     <Compile Include="math\Vector.cs" />
     <Compile Include="math\VectorFloat.cs" />
     <Compile Include="PhysicalWindow.cs" />
-    <Compile Include="model\HexagonModel.cs" />
-    <Compile Include="model\PrismModel.cs" />
-    <Compile Include="model\RectangleModel.cs" />
-    <Compile Include="model\SphereModel.cs" />
-    <Compile Include="model\WireBoxModel.cs" />
-    <Compile Include="model\Model.cs" />
-    <Compile Include="model\ModelData.cs" />
     <Compile Include="util\ArrayCompiler.cs" />
     <Compile Include="util\Buffer.cs" />
     <Compile Include="physics\Body.cs" />
     <Compile Include="physics\PlaneBody.cs" />
     <Compile Include="physics\SphereBody.cs" />
     <Compile Include="physics\BodyManager.cs" />
+    <Compile Include="model\HexagonMesh.cs" />
+    <Compile Include="model\Mesh.cs" />
+    <Compile Include="model\MeshData.cs" />
+    <Compile Include="model\PrismMesh.cs" />
+    <Compile Include="model\RectangleMesh.cs" />
+    <Compile Include="model\SphereMesh.cs" />
+    <Compile Include="model\WireBoxMesh.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
