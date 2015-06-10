@@ -16,11 +16,11 @@ namespace physical {
         }
 
         public float getDistance ( Vector3f point ) {
-            return Normal.dot( point ) - DistanceToOrigin;
+            return Normal.dot( point ) + DistanceToOrigin;
         }
 
         public float getDistance ( Matrix4f transform ) {
-            return Normal.dot( transform.TranslationX, transform.TranslationY, transform.TranslationZ ) - DistanceToOrigin;
+            return Normal.dot( transform.TranslationX, transform.TranslationY, transform.TranslationZ ) + DistanceToOrigin;
         }
     }
 }

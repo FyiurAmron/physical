@@ -10,7 +10,6 @@ namespace physical.physics {
         HashSet<Body> bodySet = new HashSet<Body>();
         Dictionary<Body,Mesh> bodyMeshMap = new Dictionary<Body, Mesh>();
         Vector3f gravity = new Vector3f( 0, -9.81f, 0 );
-        //Vector3f gravity = new Vector3f( 0, -9.81f / 10, 0 );
 
         public Vector3f Gravity { get { return gravity; } set { gravity.set( value ); } }
 

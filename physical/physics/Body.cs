@@ -28,11 +28,11 @@ namespace physical.physics {
         public Vector3f Acceleration { get { return acceleration; } set { acceleration.set( value ); } }
 
         public bool FixedPosition { get; set; }
-        /*
-        List<Action<Vector3f,Vector3f>> positionConstraints = new List<Action<Vector3f,Vector3f>>();
 
-        public List<Action<Vector3f,Vector3f>> PositionConstraints { get { return positionConstraints; } }
-*/
+        List<Action<Matrix4f,Vector3f,Vector3f>> constraints = new List<Action<Matrix4f,Vector3f,Vector3f>>();
+
+        public List<Action<Matrix4f,Vector3f,Vector3f>> Constraints { get { return constraints; } }
+
 
         public Body ( float mass ) {
             Mass = mass;
@@ -53,8 +53,18 @@ namespace physical.physics {
 
         // instance methods
 
+        public void applyForce ( float forceX, float forceY, float forceZ ) {
+            float scale = 1f / Mass;
+            acceleration.add( forceX * scale, forceY * scale, forceZ * scale );
+        }
+
         public void applyForce ( Vector3f force ) {
             acceleration.add( force.getScaled( 1 / Mass ) );
+        }
+
+        public void applyImpulse ( float velocityX, float velocityY, float velocityZ ) {
+            float scale = 1f / Mass;
+            velocity.add( velocityX * scale, velocityY * scale, velocityZ * scale );
         }
 
         public void applyImpulse ( Vector3f impulse ) {
@@ -69,10 +79,9 @@ namespace physical.physics {
             acceleration.setZero();
             if ( velocity.lengthSq() < KINEMATIC_EPSILON )
                 velocity.setZero();
-            /*
-            foreach ( Action<Vector3f,Vector3f> positionConstraint in positionConstraints )
-                positionConstraint( oldPosition, position );
-                */
+            
+            foreach ( Action<Matrix4f,Vector3f,Vector3f> constraint in constraints )
+                constraint( Transform, velocity, acceleration );
         }
 
         abstract public void checkCollision ( Body body );

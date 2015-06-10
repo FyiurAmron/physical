@@ -1,4 +1,4 @@
-﻿
+﻿using System;
 
 namespace physical.math {
     public class Vector3f : VectorFloat {
@@ -27,6 +27,13 @@ namespace physical.math {
             X = x;
             Y = y;
             Z = z;
+            return this;
+        }
+
+        public Vector3f add ( float x, float y, float z ) {
+            X += x;
+            Y += y;
+            Z += z;
             return this;
         }
 
@@ -63,6 +70,15 @@ namespace physical.math {
                                new float[]{ v3[0] - v1[0], v3[1] - v1[1], v3[2] - v1[2] } );
             normalize( norm );
             return norm;
+        }
+
+        static public float distance ( float x1, float y1, float z1, float x2, float y2, float z2 ) {
+            return (float) Math.Sqrt( distanceSq( x1, y1, z1, x2, y2, z2 ) );
+        }
+
+        static public float distanceSq ( float x1, float y1, float z1, float x2, float y2, float z2 ) {
+            float x = x2 - x1, y = y2 - y1, z = z2 - z1;
+            return x * x + y * y + z * z;
         }
     }
 }

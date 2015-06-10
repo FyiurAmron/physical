@@ -79,8 +79,6 @@ void main() {
             fragmentShaderHandle,
             shaderProgramHandle;
 
-        Random RNG = new Random();
-
         Value1f //
             time = new Value1f(),
             random = new Value1f(),
@@ -96,6 +94,7 @@ void main() {
 
         Vector3 basePosition = new Vector3();
         MouseState lastMouseState;
+        KeyboardState lastKeyboardState;
 
         UniformManager uniformManager = new UniformManager();
         BodyManager bodyManager = new BodyManager();
@@ -110,6 +109,9 @@ void main() {
         UniformMatrix4f transformMatrixUniform;
 
         Action<Matrix4f> cameraOnFrame;
+
+        SphereBody squirrelBody, turtleBody, dilloBody;
+        PlaneBody[] planeBodies;
 
         public PhysicalWindow ()
             : base( SIZE_X, SIZE_Y,
@@ -236,22 +238,33 @@ void main() {
                 m.init();
             }
 
-            SphereBody squirrelBody = new SphereBody( 1, BALL_RADIUS );
+            //bodyManager.Gravity.setZero();
+            /*SphereBody*/
+            squirrelBody = new SphereBody( 1, BALL_RADIUS );
             squirrelBody.Transform.setTranslation( 40, 40, 40 );
             squirrelBody.RotationSpeed = 1f;
-            SphereBody turtleBody = new SphereBody( 25, BALL_RADIUS * 5 );
+            /*SphereBody*/
+            turtleBody = new SphereBody( 25, BALL_RADIUS * 5 );
             turtleBody.Transform.setTranslation( 0, 20, 0 );
+            //turtleBody.Velocity.Y = 5;
             turtleBody.RotationSpeed = 1f;
-            SphereBody dilloBody = new SphereBody( 25, BALL_RADIUS * 2 );
-            dilloBody.Transform.setTranslation( -20, 100, -30 );
+            /*SphereBody*/
+            dilloBody = new SphereBody( 25, BALL_RADIUS * 2 );
+            //dilloBody.Transform.setTranslation( -20, 100, -30 );
+            dilloBody.Transform.setTranslation( 0, 40, 0 );
+            //dilloBody.Velocity.Y = -5;
             dilloBody.RotationSpeed = 1f;
-            bodyManager.addBody( new PlaneBody( new Plane3f( new Vector3f( 0, 1, 0 ), 0 ) ) );
-            bodyManager.addBody( new PlaneBody( new Plane3f( new Vector3f( 0, -1, 0 ), -boxY ) ) );
-            bodyManager.addBody( new PlaneBody( new Plane3f( new Vector3f( 1, 0, 0 ), shiftX ) ) );
-            bodyManager.addBody( new PlaneBody( new Plane3f( new Vector3f( -1, 0, 0 ), -shiftX ) ) );
-            bodyManager.addBody( new PlaneBody( new Plane3f( new Vector3f( 0, 0, 1 ), shiftZ ) ) );
-            bodyManager.addBody( new PlaneBody( new Plane3f( new Vector3f( 0, 0, -1 ), -shiftZ ) ) );
+            planeBodies = new PlaneBody[] {
+                new PlaneBody( new Plane3f( new Vector3f( 0, 1, 0 ), 0 ) ),
+                new PlaneBody( new Plane3f( new Vector3f( 0, -1, 0 ), boxY ) ),
+                new PlaneBody( new Plane3f( new Vector3f( 1, 0, 0 ), shiftX ) ),
+                new PlaneBody( new Plane3f( new Vector3f( -1, 0, 0 ), shiftX ) ),
+                new PlaneBody( new Plane3f( new Vector3f( 0, 0, 1 ), shiftZ ) ),
+                new PlaneBody( new Plane3f( new Vector3f( 0, 0, -1 ), shiftZ ) )
+            };
 
+            foreach ( PlaneBody pb in planeBodies )
+                bodyManager.addBody( pb );
             bodyManager.addBody( squirrelBody, squirrelMesh );
             bodyManager.addBody( turtleBody, turtleMesh );
             bodyManager.addBody( dilloBody, dilloMesh );
@@ -299,6 +312,10 @@ void main() {
         }
 
         override protected void OnUpdateFrame ( FrameEventArgs e ) {
+            KeyboardState currentKeyboardState = OpenTK.Input.Keyboard.GetState();
+            if ( currentKeyboardState[Key.Escape] )
+                Exit();
+
             MouseState currentMouseState = OpenTK.Input.Mouse.GetState();
             int deltaX, deltaY, deltaZ;
             if ( currentMouseState != lastMouseState ) {
@@ -316,39 +333,63 @@ void main() {
             xFactor = (float) Math.Sin( -2 * Math.PI / SIZE_X * currentMouseState.X ),
             zFactor = (float) Math.Cos( -2 * Math.PI / SIZE_X * currentMouseState.X );
 
-            KeyboardState keyboardState = OpenTK.Input.Keyboard.GetState();
-            if ( keyboardState.IsKeyDown( Key.W ) ) {
+            if ( currentKeyboardState[Key.W] ) {
                 basePosition.X -= WORLD_MOVE_FRAME_DELTA * xFactor;
                 basePosition.Z -= WORLD_MOVE_FRAME_DELTA * zFactor;
             }
-            if ( keyboardState.IsKeyDown( Key.S ) ) {
+            if ( currentKeyboardState[Key.S] ) {
                 basePosition.X += WORLD_MOVE_FRAME_DELTA * xFactor;
                 basePosition.Z += WORLD_MOVE_FRAME_DELTA * zFactor;
             }
-            if ( keyboardState.IsKeyDown( Key.A ) ) {
+            if ( currentKeyboardState[Key.A] ) {
                 basePosition.X -= WORLD_MOVE_FRAME_DELTA * zFactor;
                 basePosition.Z += WORLD_MOVE_FRAME_DELTA * xFactor;
             }
-            if ( keyboardState.IsKeyDown( Key.D ) ) {
+            if ( currentKeyboardState[Key.D] ) {
                 basePosition.X += WORLD_MOVE_FRAME_DELTA * zFactor;
                 basePosition.Z -= WORLD_MOVE_FRAME_DELTA * xFactor;
             }
-            if ( keyboardState.IsKeyDown( Key.LShift ) ) {
+            if ( currentKeyboardState[Key.LShift] ) {
                 basePosition.Y += WORLD_MOVE_FRAME_DELTA;
             }
-            if ( keyboardState.IsKeyDown( Key.LControl ) ) {
+            if ( currentKeyboardState[Key.LControl] ) {
                 basePosition.Y -= WORLD_MOVE_FRAME_DELTA;
             }
 
-            if ( keyboardState.IsKeyDown( Key.G ) ) {
+            if ( currentKeyboardState[Key.G] && !lastKeyboardState[Key.G] ) {
                 bodyManager.Gravity.invert();
             }
-            if ( keyboardState.IsKeyDown( Key.R ) ) {
+            if ( currentKeyboardState[Key.R] && !lastKeyboardState[Key.R] ) {
                 bodyManager.Gravity.rotate( 1 );
             }
+            if ( currentKeyboardState[Key.BackSlash] && !lastKeyboardState[Key.BackSlash] ) {
+                squirrelBody.Restitution = 1 - squirrelBody.Restitution;
+                dilloBody.Restitution = 1 - dilloBody.Restitution;
+                turtleBody.Restitution = 1 - turtleBody.Restitution;
+            }
+
+            if ( currentKeyboardState[Key.Number1] ) {
+                //squirrelBody.applyImpulse( Vector3f.getRandom( -10, 10 ) );
+                squirrelBody.Velocity.add( Vector3f.getRandom( -10, 10 ) );
+            }
+            if ( currentKeyboardState[Key.Number2] ) {
+                //dilloBody.applyImpulse( Vector3f.getRandom( -10, 10 ) );
+                dilloBody.Velocity.add( Vector3f.getRandom( -10, 10 ) );
+            }
+            if ( currentKeyboardState[Key.Number3] ) {
+                //turtleBody.applyImpulse( Vector3f.getRandom( -10, 10 ) );
+                turtleBody.Velocity.add( Vector3f.getRandom( -10, 10 ) );
+            }
+
+            if ( currentKeyboardState[Key.Enter] ) {
+                squirrelBody.Transform.setTranslation( 45, BALL_RADIUS, 45 );
+                squirrelBody.Velocity.set( -15, 0, -15 );
+            }
+
+            lastKeyboardState = currentKeyboardState;
 
             time.Value = ( DateTime.Now.Ticks % ( 100L * 1000 * 1000 * 1000 ) ) / 1E7f;
-            random.Value = (float) RNG.NextDouble();
+            random.Value = MathUtils.nextFloat();
             //Console.WriteLine( time[0] );
 
             if ( cameraOnFrame != null )
@@ -373,19 +414,14 @@ void main() {
                 m.update();
             }
 
-            //if ( keyboardState.IsKeyDown( Key.T ) ) {
-            bodyManager.update( (float) e.Time );
-            //bodyManager.update( (float) 1f / 60 );
-            //}
+            if ( !currentKeyboardState.IsKeyDown( Key.LAlt ) ) {
+                bodyManager.update( (float) e.Time );
+            }
 
             /*
             ambientColor.Y = (float) Math.Sin( time.Value );
             Console.WriteLine( ambientColor.Y );
             */
-
-            KeyboardState keyboard = OpenTK.Input.Keyboard.GetState();
-            if ( keyboard[Key.Escape] )
-                Exit();
         }
 
         override protected void OnRenderFrame ( FrameEventArgs e ) {

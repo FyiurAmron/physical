@@ -113,6 +113,15 @@ namespace physical.math {
             return new VectorFloat( getScaled( data, scaler.data ) );
         }
 
+        public float distance ( VectorFloat vector ) {
+            return distance( data, vector.data );
+        }
+
+        public float distanceSq ( VectorFloat vector ) {
+            return distanceSq( data, vector.data );
+        }
+        
+
         // static part
 
         static public float lengthSq ( float[] data ) {
@@ -196,6 +205,23 @@ namespace physical.math {
             for ( i--; i >= 0; i-- )
                 ret[i] = v[i] * f[i];
             return ret;
+        }
+
+        static public float distance ( float[] v1, float[] v2 ) {
+            return (float) Math.Sqrt( distanceSq( v1, v2 ) );
+        }
+
+        static public float distanceSq ( float[] v1, float[] v2 ) {
+            float sum = 0, diff;
+            for ( int i = v1.Length - 1; i >= 0; i-- ) {
+                diff = v2[i] - v1[i];
+                sum += diff * diff;
+            }
+            return sum;
+        }
+
+        static public Vector3f getRandom ( float min, float max ) {
+            return new Vector3f( MathUtils.nextFloat( min, max ), MathUtils.nextFloat( min, max ), MathUtils.nextFloat( min, max ) );
         }
     }
 }

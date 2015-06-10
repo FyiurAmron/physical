@@ -67,6 +67,7 @@
     <Compile Include="model\SphereMesh.cs" />
     <Compile Include="model\WireBoxMesh.cs" />
     <Compile Include="math\Plane3f.cs" />
+    <Compile Include="math\MathUtils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -85,5 +86,17 @@
     <Folder Include="model\" />
     <Folder Include="util\" />
     <Folder Include="physics\" />
+    <Folder Include="gfx\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="gfx\angry-armadillo.png" />
+    <None Include="gfx\angry-squirrel.png" />
+    <None Include="gfx\angry-turtle.png" />
+    <None Include="gfx\drzewka-1.PNG" />
+    <None Include="gfx\drzewka-2.PNG" />
+    <None Include="gfx\drzewka-3.PNG" />
+    <None Include="gfx\drzewka-4.PNG" />
+    <None Include="gfx\grass.png" />
+    <None Include="gfx\sky.png" />
   </ItemGroup>
 </Project>

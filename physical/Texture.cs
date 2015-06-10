@@ -28,6 +28,8 @@ namespace physical {
             // mipmaps automatically. In that case, use TextureMinFilter.LinearMipmapLinear to enable them.
             GL.TexParameter( TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear );
             GL.TexParameter( TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear );
+            GL.TexParameter( TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) TextureParameterName.ClampToEdge );
+            GL.TexParameter( TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) TextureParameterName.ClampToEdge );
 
             Bitmap bmp = new Bitmap( filename );
             BitmapData bmp_data = bmp.LockBits( new Rectangle( 0, 0, bmp.Width, bmp.Height ), ImageLockMode.ReadOnly,
