@@ -59,15 +59,17 @@
     <Compile Include="physics\PlaneBody.cs" />
     <Compile Include="physics\SphereBody.cs" />
     <Compile Include="physics\BodyManager.cs" />
-    <Compile Include="model\HexagonMesh.cs" />
-    <Compile Include="model\Mesh.cs" />
-    <Compile Include="model\MeshData.cs" />
-    <Compile Include="model\PrismMesh.cs" />
-    <Compile Include="model\RectangleMesh.cs" />
-    <Compile Include="model\SphereMesh.cs" />
-    <Compile Include="model\WireBoxMesh.cs" />
     <Compile Include="math\Plane3f.cs" />
     <Compile Include="math\MathUtils.cs" />
+    <Compile Include="mesh\HexagonMesh.cs" />
+    <Compile Include="mesh\Mesh.cs" />
+    <Compile Include="mesh\MeshData.cs" />
+    <Compile Include="mesh\PrismMesh.cs" />
+    <Compile Include="mesh\RectangleMesh.cs" />
+    <Compile Include="mesh\SphereMesh.cs" />
+    <Compile Include="mesh\WireBoxMesh.cs" />
+    <Compile Include="physics\CenteredBody.cs" />
+    <Compile Include="physics\Collider.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -83,10 +85,10 @@
   </ProjectExtensions>
   <ItemGroup>
     <Folder Include="math\" />
-    <Folder Include="model\" />
     <Folder Include="util\" />
     <Folder Include="physics\" />
     <Folder Include="gfx\" />
+    <Folder Include="mesh\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="gfx\angry-armadillo.png" />

@@ -3,9 +3,7 @@ using physical.math;
 using OpenTK;
 
 namespace physical.physics {
-    public class SphereBody : Body {
-        readonly float radius;
-
+    public class SphereBody : CenteredBody {
         // a nasty hack for ball rotation
         public float RotationAngle { get; set; }
 
@@ -17,8 +15,7 @@ namespace physical.physics {
 
         //Matrix4 tmpRotMatrix = new Matrix4();
 
-        public SphereBody ( float mass, float radius ) : base( mass ) {
-            this.radius = radius;
+        public SphereBody ( float mass, float radius ) : base( mass, radius ) {
             Restitution = 0.5f;
             //Restitution = 0.75f;
             RotationVelocityThreshold = 0.15f;
@@ -45,40 +42,6 @@ namespace physical.physics {
             RotationAngle += v * deltaT * RotationSpeed;
             Transform.setScaleAndRotation( createRotationMatrix4() );
         }
-
-        override public void checkCollision ( Body body ) {
-            if ( body is SphereBody ) {
-                SphereBody sb = (SphereBody) body;
-                Vector3f disp = Transform.getDisplacement( body.Transform );
-                float totalRadius = sb.radius + radius;
-                float dist = disp.length();
-                //Console.WriteLine( totalRadius + " " + dist );
-                float depth = totalRadius - dist;
-                if ( depth < 0 /* || depth > totalRadius */ /* <- has to be false*/ )
-                    return;
-                disp.normalize();
-                Vector3f normal = disp;
-                depth *= 0.5f;
-                Transform.addTranslation( normal.getScaled( -depth ) );
-                sb.Transform.addTranslation( normal.getScaled( depth ) );
-
-                float combinedRestitution = Restitution * body.Restitution;
-                Velocity.add( normal.getScaled( ( -1f - combinedRestitution ) * Velocity.dot( normal ) ) );
-                sb.Velocity.add( normal.getScaled( ( -1f - combinedRestitution ) * sb.Velocity.dot( normal ) ) );
-               
-            } else if ( body is PlaneBody ) {
-                PlaneBody pb = (PlaneBody) body;
-                float dist = pb.Plane3f.getDistance( Transform );
-                float depth = radius - dist;
-                if ( depth < 0 || depth > radius ) // a) sphere-to-plane collision occured, b) not too far yet
-                    return;
-                Vector3f normal = pb.Plane3f.Normal;
-                Transform.addTranslation( normal.getScaled( depth ) );
-                float combinedRestitution = Restitution * body.Restitution;
-                Velocity.add( normal.getScaled( ( -1f - combinedRestitution ) * Velocity.dot( normal ) ) );
-            } else
-                throw new ArgumentException();
-        }
-    }
+                }
 }
 

@@ -27,12 +27,11 @@ namespace physical.physics {
 
         public Vector3f Acceleration { get { return acceleration; } set { acceleration.set( value ); } }
 
-        public bool FixedPosition { get; set; }
+        //public bool FixedPosition { get; set; } // use mass = float.PositiveInfinity instead
 
         List<Action<Matrix4f,Vector3f,Vector3f>> constraints = new List<Action<Matrix4f,Vector3f,Vector3f>>();
 
         public List<Action<Matrix4f,Vector3f,Vector3f>> Constraints { get { return constraints; } }
-
 
         public Body ( float mass ) {
             Mass = mass;
@@ -83,8 +82,6 @@ namespace physical.physics {
             foreach ( Action<Matrix4f,Vector3f,Vector3f> constraint in constraints )
                 constraint( Transform, velocity, acceleration );
         }
-
-        abstract public void checkCollision ( Body body );
     }
 }
 
