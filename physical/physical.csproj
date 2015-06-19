@@ -35,9 +35,6 @@
       <HintPath>..\..\..\OpenTK_1.1\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
-    <Reference Include="JavApi">
-      <HintPath>..\..\..\_Assemblies\JavApi.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />

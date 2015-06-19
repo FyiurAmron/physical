@@ -120,7 +120,10 @@ namespace physical.math {
         public float distanceSq ( VectorFloat vector ) {
             return distanceSq( data, vector.data );
         }
-        
+
+        override public string ToString() {
+            return string.Join( ",", data );
+        }
 
         // static part
 

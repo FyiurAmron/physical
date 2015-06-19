@@ -3,8 +3,8 @@
  @author poponuro
  */
 
-using biz.ritter.javapi.lang;
 using System;
+using physical.math;
 
 namespace physical.util {
     abstract public class ArrayCompiler {
@@ -76,11 +76,11 @@ namespace physical.util {
             }
 
             public void put ( float f ) {
-                put( Float.floatToIntBits( f ) );
+                put( MathUtils.floatToIntBits( f ) );
             }
 
             public void put ( double d ) {
-                put( biz.ritter.javapi.lang.Double.doubleToLongBits( d ) );
+                put( MathUtils.doubleToLongBits( d ) );
             }
 
             public void put ( long l, int bytes ) { // bytes - significant bytes (counted from right)

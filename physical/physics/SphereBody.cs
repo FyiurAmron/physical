@@ -16,8 +16,7 @@ namespace physical.physics {
         //Matrix4 tmpRotMatrix = new Matrix4();
 
         public SphereBody ( float mass, float radius ) : base( mass, radius ) {
-            Restitution = 0.5f;
-            //Restitution = 0.75f;
+            Restitution = 0.75f;
             RotationVelocityThreshold = 0.15f;
         }
 
@@ -42,6 +41,6 @@ namespace physical.physics {
             RotationAngle += v * deltaT * RotationSpeed;
             Transform.setScaleAndRotation( createRotationMatrix4() );
         }
-                }
+    }
 }
 

@@ -41,6 +41,8 @@ namespace physical.physics {
             SphereBody sb1 = body1 as SphereBody, sb2 = body2 as SphereBody;
             if ( sb1 == null || sb2 == null )
                 throw new InvalidOperationException();
+            
+            float res = sb1.Restitution * sb2.Restitution;
             Vector3f disp = sb1.Transform.getDisplacement( sb2.Transform );
             float totalRadius = sb1.Radius + sb2.Radius;
             float dist = disp.length();
@@ -51,12 +53,17 @@ namespace physical.physics {
             disp.normalize();
             Vector3f normal = disp;
             depth *= 0.5f;
-            sb1.Transform.addTranslation( normal.getScaled( -depth ) );
-            sb2.Transform.addTranslation( normal.getScaled( depth ) );
 
-            float combinedRestitution = sb1.Restitution * sb2.Restitution;
-            sb1.Velocity.add( normal.getScaled( ( -1f - combinedRestitution ) * sb1.Velocity.dot( normal ) ) );
-            sb2.Velocity.add( normal.getScaled( ( -1f - combinedRestitution ) * sb2.Velocity.dot( normal ) ) );
+            sb1.Transform.addTranslation( normal.getScaled( -depth ) );
+            //sb2.Transform.addTranslation( normal.getScaled( depth ) );
+
+            float v1n = sb1.Velocity.dot( normal ), v2n = sb2.Velocity.dot( normal ), v1n2, v2n2,
+            vDiffRes = res * ( v1n - v2n );
+            v1n2 = ( sb1.Mass * v1n + sb2.Mass * ( v2n - vDiffRes ) ) / ( sb1.Mass + sb2.Mass );
+            v2n2 = vDiffRes + v1n2;
+
+            sb1.Velocity.add( normal.getScaled( v1n2 - v1n ) );
+            sb2.Velocity.add( normal.getScaled( v2n2 - v2n ) );
             return true;
         }
     }
@@ -76,8 +83,8 @@ namespace physical.physics {
                 return false;
             Vector3f normal = pb.Plane3f.Normal;
             sb.Transform.addTranslation( normal.getScaled( depth ) );
-            float combinedRestitution = sb.Restitution * pb.Restitution;
-            sb.Velocity.add( normal.getScaled( ( -1f - combinedRestitution ) * sb.Velocity.dot( normal ) ) );
+            float res = sb.Restitution * pb.Restitution;
+            sb.Velocity.add( normal.getScaled( ( -1f - res ) * sb.Velocity.dot( normal ) ) );
             return true;
         }
     }
