@@ -79,11 +79,11 @@ namespace physical.physics {
                 if ( contact ) {
                     //Console.WriteLine( "contact continued: " + body1 + " [" + i + "] vs " + body2 + " [" + j + "]" );
                 } else {
-                    Console.WriteLine( "contact started: " + body1 + " [" + i + "] vs " + body2 + " [" + j + "]" );
+                    //Console.WriteLine( "contact started: " + body1 + " [" + i + "] vs " + body2 + " [" + j + "]" );
                     addContact( body1, body2 );
                 }
             } else if ( contact ) {
-                Console.WriteLine( "contact ended: " + body1 + " [" + i + "] vs " + body2 + " [" + j + "]" );
+                //Console.WriteLine( "contact ended: " + body1 + " [" + i + "] vs " + body2 + " [" + j + "]" );
                 removeContact( body1, body2 );
             }
         }
@@ -92,6 +92,9 @@ namespace physical.physics {
             //Console.WriteLine( "update; deltaT = " + deltaT );
             for ( int i = bodies.Count - 1; i >= 0; i-- ) {
                 Body body1 = bodies[i];
+                if ( body1.Mass != float.PositiveInfinity ) {
+                    body1.Acceleration.add( gravity );
+                }
                 for ( int j = i - 1; j >= 0; j-- ) {
                     Body body2 = bodies[j];
                     bool contact = hasContact( body1, body2 );
@@ -102,26 +105,28 @@ namespace physical.physics {
                     colliderMap.TryGetValue( cd, out collider );
                     if ( collider != null ) {
                         collide( collider, contact, body1, body2, i, j );
+                        continue;
+                    } 
+                    cd = new ColliderDescriptor( t2, t1 );
+                    colliderMap.TryGetValue( cd, out collider );
+                    if ( collider == null ) {
+                        //throw new InvalidOperationException( "unsupported collision: " + t1 + " vs " + t2 );
                     } else {
-                        cd = new ColliderDescriptor( t2, t1 );
-                        colliderMap.TryGetValue( cd, out collider );
-                        if ( collider == null ) {
-                            //throw new InvalidOperationException( "unsupported collision: " + t1 + " vs " + t2 );
-                        } else {
-                            collide( collider, contact, body2, body1, i, j );
-                        }
+                        collide( collider, contact, body2, body1, i, j );
                     }
                 }
-                if ( body1.Mass == float.PositiveInfinity )
-                    continue;
-                body1.Acceleration.add( gravity );
-                body1.timeStep( deltaT );
-                //Console.WriteLine( "position: " + body1.Transform.TranslationX + "," + body1.Transform.TranslationY + "," + body1.Transform.TranslationZ );
+                if ( body1.Mass != float.PositiveInfinity ) {
+                    body1.timeStep( deltaT );
+                    //Console.WriteLine( "position: " + body1.Transform.TranslationX + "," + body1.Transform.TranslationY + "," + body1.Transform.TranslationZ );
 
-                if ( bodyMeshMap.ContainsKey( body1 ) )
-                    bodyMeshMap[body1].Transform.set( body1.Transform );
+                    if ( bodyMeshMap.ContainsKey( body1 ) )
+                        bodyMeshMap[body1].Transform.set( body1.Transform );
+                }
             }
+            //Console.WriteLine( "updated" );
         }
+
+        // end of class BodyManager
     }
 }
 

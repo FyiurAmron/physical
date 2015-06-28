@@ -5,7 +5,7 @@ using physical.math;
 
 namespace physical.physics {
     public abstract class Body {
-        protected const float KINEMATIC_EPSILON = 1E-3f;
+        public const float KINEMATIC_EPSILON_SQ = 1E-2f;
 
         public float Mass { get; set; }
 
@@ -19,19 +19,24 @@ namespace physical.physics {
 
         public float Restitution { get; set; }
 
+        public float Friction { get; set; }
+
         //public Vector3f Position { get { return position; } set { position.set( value ); } }
 
         public Matrix4f Transform { get; set; }
 
         public Vector3f Velocity { get { return velocity; } set { velocity.set( value ); } }
 
-        public Vector3f Acceleration { get { return acceleration; } set { acceleration.set( value ); } }
+        protected internal Vector3f Acceleration { get { return acceleration; } set { acceleration.set( value ); } }
 
         //public bool FixedPosition { get; set; } // use mass = float.PositiveInfinity instead
 
-        List<Action<Matrix4f,Vector3f,Vector3f>> constraints = new List<Action<Matrix4f,Vector3f,Vector3f>>();
+        List<Action<Body>> constraints = new List<Action<Body>>();
+        List<Action<Body>> forces = new List<Action<Body>>();
 
-        public List<Action<Matrix4f,Vector3f,Vector3f>> Constraints { get { return constraints; } }
+        public List<Action<Body>> Forces { get { return forces; } }
+
+        public List<Action<Body>> Constraints { get { return constraints; } }
 
         public Body ( float mass ) {
             Mass = mass;
@@ -70,17 +75,27 @@ namespace physical.physics {
             velocity.add( impulse.getScaled( 1 / Mass ) );
         }
 
+        protected internal Vector3f getForce () {
+            Vector3f v3f = new Vector3f( Acceleration );
+            v3f.scale( Mass );
+            return v3f;
+        }
+
         virtual public void timeStep ( float deltaT ) {
+            foreach ( Action<Body> force in forces )
+                force( this );
+            
             //oldPosition.set( position );
             velocity.add( acceleration.getScaled( deltaT ) );
             //position.add( velocity.getScaled( deltaT ) );
-            Transform.addTranslation( velocity.getScaled( deltaT ) );
-            acceleration.setZero();
-            if ( velocity.lengthSq() < KINEMATIC_EPSILON )
+            if ( velocity.lengthSq() < KINEMATIC_EPSILON_SQ )
                 velocity.setZero();
-            
-            foreach ( Action<Matrix4f,Vector3f,Vector3f> constraint in constraints )
-                constraint( Transform, velocity, acceleration );
+            else
+                Transform.addTranslation( velocity.getScaled( deltaT ) );
+            acceleration.setZero();
+
+            foreach ( Action<Body> constraint in constraints )
+                constraint( this );
         }
     }
 }

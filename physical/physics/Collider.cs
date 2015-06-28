@@ -83,8 +83,21 @@ namespace physical.physics {
                 return false;
             Vector3f normal = pb.Plane3f.Normal;
             sb.Transform.addTranslation( normal.getScaled( depth ) );
+
             float res = sb.Restitution * pb.Restitution;
-            sb.Velocity.add( normal.getScaled( ( -1f - res ) * sb.Velocity.dot( normal ) ) );
+            float vn = sb.Velocity.dot( normal );
+            Vector3f vTangent = new Vector3f( sb.Velocity );
+            vTangent.subtract( normal.getScaled( vn ) );
+            sb.Velocity.add( normal.getScaled( ( -1f - res ) * vn ) );
+
+            Vector3f F = sb.getForce();
+            float fn = F.dot( normal );
+            F.subtract( normal.getScaled( fn ) ); // surface reaction
+            if ( vTangent.lengthSq() > Body.KINEMATIC_EPSILON_SQ ) {
+                vTangent.normalize().scale( fn * pb.Friction );
+                sb.applyForce( vTangent );
+            }
+
             return true;
         }
     }

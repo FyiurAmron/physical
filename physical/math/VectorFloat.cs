@@ -52,6 +52,12 @@ namespace physical.math {
             setValue( 0 );
         }
 
+        public bool isZero () {
+            for ( int i = data.Length - 1; i >= 0; i-- )
+                if ( data[i] != 0 )
+                    return false;
+            return true;
+        }
 
         public float lengthSq () {
             return lengthSq( data );
@@ -61,8 +67,9 @@ namespace physical.math {
             return length( data );
         }
 
-        public void normalize () {
+        public VectorFloat normalize () {
             normalize( data );
+            return this;
         }
 
         public float dot ( VectorFloat vector ) {
@@ -113,6 +120,10 @@ namespace physical.math {
             return new VectorFloat( getScaled( data, scaler.data ) );
         }
 
+        public VectorFloat getNormalized () {
+            return new VectorFloat( getNormalized( data ) );
+        }
+
         public float distance ( VectorFloat vector ) {
             return distance( data, vector.data );
         }
@@ -121,7 +132,7 @@ namespace physical.math {
             return distanceSq( data, vector.data );
         }
 
-        override public string ToString() {
+        override public string ToString () {
             return string.Join( ",", data );
         }
 
@@ -163,6 +174,14 @@ namespace physical.math {
             for ( int i = v.Length - 1; i >= 0; i-- )
                 v[i] -= t[i];
             return v;
+        }
+
+        static public float[] getNormalized ( float[] data ) {
+            float[] ret = new float[data.Length];
+            float lenFactor = 1.0f / length( data );
+            for ( int i = data.Length - 1; i >= 0; i-- )
+                ret[i] = data[i] * lenFactor;
+            return ret;
         }
 
         static public float[] getSum ( float[] v, float[] t ) {

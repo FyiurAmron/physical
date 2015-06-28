@@ -38,8 +38,10 @@ namespace physical.physics {
             if ( v < RotationVelocityThreshold )
                 return;
             //Console.WriteLine( Velocity.length() );
+            /*
             RotationAngle += v * deltaT * RotationSpeed;
             Transform.setScaleAndRotation( createRotationMatrix4() );
+            */
         }
     }
 }

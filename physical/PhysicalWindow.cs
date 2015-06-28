@@ -251,9 +251,28 @@ void main() {
             /*SphereBody*/
             dilloBody = new SphereBody( 25, BALL_RADIUS * 2 );
             //dilloBody.Transform.setTranslation( -20, 100, -30 );
-            dilloBody.Transform.setTranslation( 0, 40, 0 );
+            dilloBody.Transform.setTranslation( 0, 30, 0 );
             //dilloBody.Velocity.Y = -5;
             dilloBody.RotationSpeed = 1f;
+            Vector3f fixPoint = new Vector3f( 0, 42, 9 );
+            /*
+             // spring - vertical harmonic oscillator
+            dilloBody.Forces.Add( delegate( Body obj ) {
+                Vector3f disp = obj.Transform.getDisplacement( fixPoint );
+                float k = 20.0f;
+                disp.scale( k );
+                obj.applyForce( disp );
+            } );
+            */
+
+            // springy pendulum - 3D harmonic oscillator
+            dilloBody.Forces.Add( delegate( Body obj ) {
+                Vector3f disp = obj.Transform.getDisplacement( fixPoint );
+                float k = 10.0f, l = 15.0f;
+                disp.scale( k * (disp.length() - l) );
+                obj.applyForce( disp );
+            } );
+
             planeBodies = new PlaneBody[] {
                 new PlaneBody( new Plane3f( new Vector3f( 0, 1, 0 ), 0 ) ),
                 new PlaneBody( new Plane3f( new Vector3f( 0, -1, 0 ), boxY ) ),
@@ -263,8 +282,10 @@ void main() {
                 new PlaneBody( new Plane3f( new Vector3f( 0, 0, -1 ), shiftZ ) )
             };
 
-            foreach ( PlaneBody pb in planeBodies )
+            foreach ( PlaneBody pb in planeBodies ) {
+                pb.Friction = 0.1f;
                 bodyManager.addBody( pb );
+            }
             bodyManager.addBody( squirrelBody, squirrelMesh );
             bodyManager.addBody( turtleBody, turtleMesh );
             bodyManager.addBody( dilloBody, dilloMesh );

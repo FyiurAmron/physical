@@ -81,20 +81,33 @@ namespace physical.math {
             setTranslation( vectorFloat.Data );
         }
 
+        public Vector3f getDisplacement ( Vector3f target ) {
+            return new Vector3f( target.X - TranslationX, target.Y - TranslationY, target.Z - TranslationZ );
+        }
+
         public Vector3f getDisplacement ( Matrix4f target ) {
             return new Vector3f( target.TranslationX - TranslationX, target.TranslationY - TranslationY, target.TranslationZ - TranslationZ );
+        }
+
+        public float translationDistance ( Vector3f v ) {
+            return Vector3f.distance(
+                TranslationX, TranslationY, TranslationZ,
+                v.X, v.Y, v.Z
+            );
         }
 
         public float translationDistance ( Matrix4f matrix4 ) {
             return Vector3f.distance(
                 TranslationX, TranslationY, TranslationZ,
-                matrix4.TranslationX, matrix4.TranslationY, matrix4.TranslationZ );
+                matrix4.TranslationX, matrix4.TranslationY, matrix4.TranslationZ
+            );
         }
 
         public float translationDistanceSq ( Matrix4f matrix4 ) {
             return Vector3f.distanceSq(
                 TranslationX, TranslationY, TranslationZ,
-                matrix4.TranslationX, matrix4.TranslationY, matrix4.TranslationZ );
+                matrix4.TranslationX, matrix4.TranslationY, matrix4.TranslationZ
+            );
         }
 
         public void setScaleAndRotation ( Matrix4 matrix4 ) {
