@@ -89,6 +89,10 @@ namespace physical.physics {
         }
 
         public void update ( float deltaT ) {
+            if ( deltaT == 0 )
+                return;
+            if ( deltaT < 0 )
+                throw new ArgumentException( "deltaT < 0" );
             //Console.WriteLine( "update; deltaT = " + deltaT );
             for ( int i = bodies.Count - 1; i >= 0; i-- ) {
                 Body body1 = bodies[i];

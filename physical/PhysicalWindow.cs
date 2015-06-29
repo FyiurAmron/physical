@@ -269,7 +269,7 @@ void main() {
             dilloBody.Forces.Add( delegate( Body obj ) {
                 Vector3f disp = obj.Transform.getDisplacement( fixPoint );
                 float k = 10.0f, l = 15.0f;
-                disp.scale( k * (disp.length() - l) );
+                disp.scale( k * ( disp.length() - l ) );
                 obj.applyForce( disp );
             } );
 
@@ -424,6 +424,7 @@ void main() {
                                   basePosition.Z + zFactor * radius
                               );
                 //Console.WriteLine( pos );
+
                 modelviewMatrix.set( Matrix4.LookAt( pos,
                     new Vector3( basePosition.X, BASE_VIEW_HEIGHT + basePosition.Y - radius * currentMouseState.Y / SIZE_Y, basePosition.Z ),
                     new Vector3( 0, 1, 0 ) ) );
@@ -436,7 +437,12 @@ void main() {
             }
 
             if ( !currentKeyboardState.IsKeyDown( Key.LAlt ) ) {
-                bodyManager.update( (float) e.Time );
+                float TIME_THRESHOLD = 1f / 60f, stepTime = (float) e.Time;
+                while ( stepTime > TIME_THRESHOLD ) {
+                    bodyManager.update( TIME_THRESHOLD );
+                    stepTime -= TIME_THRESHOLD;
+                }
+                bodyManager.update( stepTime );
             }
 
             /*
